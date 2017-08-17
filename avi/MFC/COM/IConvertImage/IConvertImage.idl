@@ -1,0 +1,174 @@
+// IConvertImage.idl : IDL source for IConvertImage.dll
+//
+
+// This file will be processed by the MIDL tool to
+// produce the type library (IConvertImage.tlb) and marshalling code.
+
+
+import "oaidl.idl";
+import "ocidl.idl";
+import "ImageFormats.h";
+
+	[
+		object,
+		uuid(7F399F71-B8E5-4AAC-97D2-92991D677866),
+	
+		helpstring("IConvertImage Interface"),
+		pointer_default(unique)
+	]
+	interface IConvertImage : IUnknown
+	{
+		[helpstring("method ConvertImage. Convert image from one format to another one.")] HRESULT ConvertImage([in] unsigned char *lpvDst, [in] unsigned char *lpvSrc, [in] int iWidth, [in] int iHeight, [in] int iStrideDst, [in] int iStrideSrc, [in] int iTypeDst, [in] int iTypeSrc);
+	};
+	[
+		object,
+		uuid(EBC3AE44-0A7C-4ba5-AF5D-9EA475C2DC11),
+	
+		helpstring("IConvertImageYUVPlanar Interface"),
+		pointer_default(unique)
+	]
+	interface IConvertImageYUVPlanar : IUnknown
+	{
+		[helpstring("method ConvertYUVPlanarToImage. Convert image from YUV planar format to another frame format")] HRESULT ConvertYUVPlanarToImage([in] unsigned char *lpvDst, [in] unsigned char *lpvSrcY, [in] unsigned char *lpvSrcU, [in] unsigned char *lpvSrcV, [in] unsigned int nWidth, [in] unsigned int nHeight, [in] int iStrideDst, [in] int iStrideSrcY, [in] int iStrideSrcU, [in] int iStrideSrcV, [in] int nFormat);
+		[helpstring("method ConvertImageToYUVPlanar. Convert image from one format to YUV planar format")] HRESULT ConvertImageToYUVPlanar([in] unsigned char *lpvDstY, [in] unsigned char *lpvDstU, [in] unsigned char *lpvDstV, [in] unsigned char *lpvSrc, [in] unsigned int nWidth, [in] unsigned int nHeight, [in] int iStrideDstY, [in] int iStrideDstU, [in] int iStrideDstV, [in] int iStrideSrc, [in] int nFormat);
+	};
+	[
+		object,
+		uuid(D3A57963-280A-4bca-881E-DDCBF832EF61),
+	
+		helpstring("IConvertImageGamma Interface"),
+		pointer_default(unique)
+	]
+	interface IConvertImageGamma : IUnknown
+	{
+		[helpstring("Convert from one format to another one with gamma correction")] HRESULT ConvertImageGamma([in] unsigned char *lpvDst, [in] unsigned char *lpvSrc, [in] unsigned int nWidth, [in] unsigned int nHeight, [in] int iStrideDst, [in] int iStrideSrc, [in] int nFormatDst, [in] int nFormatSrc);
+		[helpstring("Set gamma for PAL system")] HRESULT SetGammaPal();
+		[helpstring("Set gamma for NTSC system")] HRESULT SetGammaNtsc();
+		[helpstring("Set new gamma")] HRESULT SetGamma([in] double dGamma);
+	};
+	[
+		object,
+		uuid(076F9D3D-D665-41EC-8DAE-71D679F9E118),
+	
+		helpstring("IStretchImage Interface"),
+		pointer_default(unique)
+	]
+	interface IStretchImage : IUnknown
+	{
+		[helpstring("Stretch image both by width and height")] HRESULT StretchImage([in] unsigned char *lpvDst, [in] unsigned char *lpvSrc, [in] unsigned int nWidthDst, [in] unsigned int nHeightDst, [in] unsigned int nWidthSrc, [in] unsigned int nHeightSrc, [in] int iStrideDst, [in] int iStrideSrc, [in] int nFormat);
+	};
+	[
+		object,
+		uuid(A3EA29A5-5FA1-455A-81B0-BEC10EC6173D),
+	
+		helpstring("ICopyMemory Interface"),
+		pointer_default(unique)
+	]
+	interface ICopyMemory : IUnknown
+	{
+		[helpstring("method CopyMemoryFast. Copy memory fast with supporting CPU features")] HRESULT CopyMemoryFast([in] unsigned char *lpbDestination, [in] unsigned char *lpbSource, [in] unsigned int nCountBytes);
+		[helpstring("method SetMemoryByte. Fill memory with byte value, using CPU features")] HRESULT SetMemoryByte([in] unsigned char *lpbDestination, [in] unsigned int nCountBytes, [in] unsigned char bValue);
+		[helpstring("method SetMemoryWord. Fill memory with word value, using CPU features")] HRESULT SetMemoryWord([in] unsigned short *lpwDestination, [in] unsigned int nCountWords, [in] unsigned short wValue);
+		[helpstring("method SetMemoryDword. Fill memory with dword value, using CPU features")] HRESULT SetMemoryDword([in] unsigned int *lpnDestination, [in] unsigned int nCountDwords, [in] unsigned int nValue);
+		[helpstring("method ZeroMemoryFast. Fill memory with zero value, using CPU features")] HRESULT ZeroMemoryFast([in] unsigned char *lpbDestination, [in] unsigned int nCountBytes);
+	};
+	[
+		object,
+		uuid(9A0ABE85-062D-432A-97C4-080E38CA558B),
+	
+		helpstring("ITitleMixer Interface"),
+		pointer_default(unique)
+	]
+	interface ITitleMixer : IUnknown
+	{
+		[helpstring("method MovTitle. Copy title with alpha multiplying")] HRESULT MovTitle([in] BYTE *lpbDestination, [in] BYTE *lpbSource, [in] unsigned int nWidth, [in] unsigned int nHeight, [in] int iStrideDst, [in] int iStrideSrc, [in] int nRegionAlpha);
+		[helpstring("method AddTitle. Mix new title with existing one")] HRESULT AddTitle([in] BYTE *lpbDestination, [in] BYTE *lpbSource, [in] unsigned int nWidth, [in] unsigned int nHeight, [in] int iStrideDst, [in] int iStrideSrc, [in] int nRegionAlpha);
+		[helpstring("method CompressToRLE. Compress temporal buffer to RLE compressed buffer")] HRESULT CompressToRLE([in, out] BYTE **lpbDestination, [in] BYTE *lpbSource, [in] unsigned int nWidth, [in] unsigned int nHeight, [in] int iStrideSource, [in, out] int **lpiCounter);
+	};
+	[
+		object,
+		uuid(8F29D605-BC2A-482E-8A44-C32B42517356),
+	
+		helpstring("IY16ARLECompressor Interface"),
+		pointer_default(unique)
+	]
+	interface IY16ARLECompressor : IUnknown
+	{
+		[helpstring("method Compress. Compress uncompressed picture to Y16RLE compressed picture.")] HRESULT Compress([in, out] BYTE **lpvDestination, [in] BYTE *lpvSource, [in] unsigned int nWidth, [in] unsigned int nHeight, [in] int iStrideSource, [in, out] int **lpiCounter, [in] int nTypeSource);
+	};
+	[
+		object,
+		uuid(323C5C6C-92A6-4024-A80E-03F78EC4105E),
+	
+		helpstring("IDeinterlaceMaker Interface"),
+		pointer_default(unique)
+	]
+	interface IDeinterlaceMaker : IUnknown
+	{
+		[helpstring("method RestoreLowerField. Restore from 3 field one full bothfielded picture. Alpha is not used.")] HRESULT RestoreLowerField([in] BYTE *lpbDest, [in] BYTE *lpbSrcPrev, [in] BYTE *lpbSrcNext, [in] BYTE *lpbSrcUpper, [in] DWORD nFieldWidth, [in] DWORD nFieldHeight, [in] int iStrideDest, [in] int iStrideSrc, [in] DWORD Kmin, [in] DWORD Kmax);
+		[helpstring("method RestoreUpperField. Restore both fielded picture from 3 field. Alpha is not used.")] HRESULT RestoreUpperField([in] BYTE *lpbDest, [in] BYTE *lpbSrcPrev, [in] BYTE *lpbSrcNext, [in] BYTE *lpbSrcLower, [in] DWORD nFieldWidth, [in] DWORD nFieldHeight, [in] int iStrideDest, [in] int iStrideSrc, [in] DWORD Kmin, [in] DWORD Kmax);
+		[helpstring("method RestoreLowerField. Restore from 3 field one full bothfielded picture. Alpha is used.")] HRESULT RestoreLowerFieldAlpha([in] BYTE *lpbDest, [in] BYTE *lpbSrcPrev, [in] BYTE *lpbSrcNext, [in] BYTE *lpbSrcUpper, [in] DWORD nFieldWidth, [in] DWORD nFieldHeight, [in] int iStrideDest, [in] int iStrideSrc, [in] DWORD Kmin, [in] DWORD Kmax);
+		[helpstring("method RestoreUpperField. Restore both fielded picture from 3 field. Alpha is used.")] HRESULT RestoreUpperFieldAlpha([in] BYTE *lpbDest, [in] BYTE *lpbSrcPrev, [in] BYTE *lpbSrcNext, [in] BYTE *lpbSrcLower, [in] DWORD nFieldWidth, [in] DWORD nFieldHeight, [in] int iStrideDest, [in] int iStrideSrc, [in] DWORD Kmin, [in] DWORD Kmax);
+	};
+
+[
+	uuid(B6D80AF6-B6D4-411A-BFD6-77C1613F511F),
+	version(1.0),
+	helpstring("IConvertImage 1.0 Type Library")
+]
+library ICONVERTIMAGELib
+{
+	importlib("stdole32.tlb");
+	importlib("stdole2.tlb");
+
+	[
+		uuid(2ACC22E9-B881-4873-BC39-DE01DD49185E),
+		helpstring("ConvertImage Class")
+	]
+	coclass ConvertImage
+	{
+		[default] interface IConvertImage;
+		interface IConvertImageYUVPlanar;
+		interface IConvertImageGamma;
+	};
+	[
+		uuid(31E38A3B-4457-4227-95B0-AC737DAC583E),
+		helpstring("StretchImage Class")
+	]
+	coclass StretchImage
+	{
+		[default] interface IStretchImage;
+	};
+	[
+		uuid(8EAE9EC1-94D8-4BC4-AC19-CA65EEC825FE),
+		helpstring("CopyMemory Class")
+	]
+	coclass CopyMemory
+	{
+		[default] interface ICopyMemory;
+	};
+	[
+		uuid(C98ABA7E-D4E3-4630-9601-C7323F6FCE7A),
+		helpstring("TitleMixer Class")
+	]
+	coclass TitleMixer
+	{
+		[default] interface ITitleMixer;
+	};
+	[
+		uuid(0B5E501E-4513-4CA7-81BB-F08E129CA27A),
+		helpstring("Y16ARLECompressor Class")
+	]
+	coclass Y16ARLECompressor
+	{
+		[default] interface IY16ARLECompressor;
+	};
+	[
+		uuid(6105D26A-775A-47A6-9EB2-321639DD398E),
+		helpstring("DeinterlaceMaker Class")
+	]
+	coclass DeinterlaceMaker
+	{
+		[default] interface IDeinterlaceMaker;
+	};
+};

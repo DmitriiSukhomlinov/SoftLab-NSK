@@ -1,0 +1,204 @@
+// GetAVIInfo.idl : IDL source for GetAVIInfo.dll
+//
+
+// This file will be processed by the MIDL tool to
+// produce the type library (GetAVIInfo.tlb) and marshalling code.
+
+import "oaidl.idl";
+import "ocidl.idl";
+
+cpp_quote("#pragma pack(1)")
+typedef struct
+{
+	DWORD	fccType;
+	DWORD	fr_flags;
+	DWORD	fr_pos;
+	DWORD	fr_size;
+} IndexFileEntry;
+cpp_quote("#pragma pack()")
+
+
+	[
+		object,
+		uuid(5F3B918F-FD8B-40f0-B1A7-0791EB6E5314),
+		dual,
+		helpstring("IGetAVIInfoOld Interface"),
+		pointer_default(unique)
+	]
+	interface IGetAVIInfoOld : IDispatch
+	{
+		[id(1), helpstring("method Load opens AVI-file & reads info about video & audio streams")] 
+			HRESULT Load([in]BSTR file_name);
+		[id(2), helpstring("method GetName returns name of opened file")] 
+			HRESULT GetName([out]BSTR* file_name);
+		[id(3), helpstring("method GetVideoStreamNumber returns a number of video streams")] 
+			HRESULT GetVideoStreamNumber([out] long* num);
+		[id(4), helpstring("method GetAudioStreamNumber returns a number of audio streams")] 
+			HRESULT GetAudioStreamNumber([out]long* num);
+		[id(5), helpstring("method GetVideoStreamInfo returns AVIStreamHeader for video stream & sizes of format info")] 
+			HRESULT GetVideoStreamInfo([in] long index,[out,size_is(size),length_is(*ln)] BYTE* stream_header,[in] long size,[out] long* ln,[out] long* size_info,[out] long* size_infoex);
+		[id(6), helpstring("method GetAudioStreamInfo return AVIStreamHeader for audio stream & size of format info")] 
+			HRESULT GetAudioStreamInfo([in] long index,[out,size_is(size),length_is(*ln)] BYTE* stream_header,[in] long size,[out] long* ln,[out] long* size_info);
+		[id(7), helpstring("method GetVideoFrameNumber returns a number of frames in video stream")] 
+			HRESULT GetVideoFrameNumber([in] long index, [out] long* frame_count);
+		[id(8), helpstring("method GetAudioChunkNumber returns a number of chunk in audio stream")] 
+			HRESULT GetAudioChunkNumber([in] long index, [out] long* chunk_count);
+		[id(9), helpstring("method GetVideoFrameInfo returns a position & size of video frame")] 
+			HRESULT GetVideoFrameInfo([in] long index, [in] long frame_number, [out] long* hi_offset, [out] ULONG* low_offset, [out] ULONG* size);
+		[id(10), helpstring("method GetAudioChunkInfo returns a position & size of audio frame")] 
+			HRESULT GetAudioChunkInfo([in] long index, [in] long chunk_number, [out] long* hi_offset, [out] ULONG* low_offset, [out] ULONG* size);
+		[id(11), helpstring("method GetVideoFormatInfo returns BITMAPINFOHEADER for video stream")] 
+			HRESULT GetVideoFormatInfo([in] long index, [out,size_is(buf_size),length_is(*copy_size)] BYTE* format_info, [in] long buf_size, [out] long* copy_size);
+		[id(12), helpstring("method GetAudioFormatInfo returns WAVEFORMAT for audio stream")] 
+			HRESULT GetAudioFormatInfo([in] long index, [out,size_is(buf_size),length_is(*copy_size)] BYTE* format_info, [in] long buf_size, [out] long* copy_size);
+		[id(13), helpstring("method GetVideoExtFormatInfo returns extended format info for video stream")] 
+			HRESULT GetVideoExtFormatInfo([in] long index, [out,size_is(buf_size),length_is(*copy_size)] BYTE* format_info, [in] long buf_size, [out] long* copy_size);
+		[id(14), helpstring("method GetAudioSampleInfo returns number of audio chunk & offset in the chunk of audio sample")] 
+			HRESULT GetAudioSampleInfo([in] long index, [in] UINT sample_number, [out] UINT* chunk_num, [out] UINT* offset);
+		[id(15), helpstring("method GetMainHeader returns MainAVIHeader")] 
+			HRESULT GetMainHeader([out,size_is(buf_size),length_is(*copy_size)] BYTE* buffer, [in] long buf_size, [out] long* copy_size);
+		[id(16), helpstring("method GetVideoFrameInfo2 returns a position, size & flags of video frame")] 
+			HRESULT GetVideoFrameInfo2([in] long index, [in] long frame_number, [out] long* hi_offset, [out] ULONG* low_offset, [out] ULONG* size, [out] ULONG* flags);
+		[id(17), helpstring("method GetAudioChunkInfo2 returns a position, size & flags of audio frame")] 
+			HRESULT GetAudioChunkInfo2([in] long index, [in] long chunk_number, [out] long* hi_offset, [out] ULONG* low_offset, [out] ULONG* size, [out] ULONG* flags);
+	};
+	[
+		object,
+		uuid(3CB22126-3A53-4309-838D-1580A2339C8E),
+		dual,
+		helpstring("IGetAVIInfo Interface"),
+		pointer_default(unique)
+	]
+	interface IGetAVIInfo : IDispatch
+	{
+		[id(1), helpstring("method Load opens AVI-file & reads info about video & audio streams")] 
+			HRESULT Load([in]BSTR file_name);
+		[id(2), helpstring("method GetName returns name of opened file")] 
+			HRESULT GetName([out]BSTR* file_name);
+		[id(3), helpstring("method GetVideoStreamNumber returns a number of video streams")] 
+			HRESULT GetVideoStreamNumber([out] long* num);
+		[id(4), helpstring("method GetAudioStreamNumber returns a number of audio streams")] 
+			HRESULT GetAudioStreamNumber([out]long* num);
+		[id(5), helpstring("method GetVideoStreamInfo returns AVIStreamHeader for video stream & sizes of format info")] 
+			HRESULT GetVideoStreamInfo([in] long index,[out,size_is(size),length_is(*ln)] BYTE* stream_header,[in] long size,[out] long* ln,[out] long* size_info,[out] long* size_infoex);
+		[id(6), helpstring("method GetAudioStreamInfo return AVIStreamHeader for audio stream & size of format info")] 
+			HRESULT GetAudioStreamInfo([in] long index,[out,size_is(size),length_is(*ln)] BYTE* stream_header,[in] long size,[out] long* ln,[out] long* size_info);
+		[id(7), helpstring("method GetVideoFrameNumber returns a number of frames in video stream")] 
+			HRESULT GetVideoFrameNumber([in] long index, [out] long* frame_count);
+		[id(8), helpstring("method GetAudioChunkNumber returns a number of chunk in audio stream")] 
+			HRESULT GetAudioChunkNumber([in] long index, [out] long* chunk_count);
+		[id(9), helpstring("method GetVideoFrameInfo returns a position & size of video frame")] 
+			HRESULT GetVideoFrameInfo([in] long index, [in] long frame_number, [out] long* hi_offset, [out] ULONG* low_offset, [out] ULONG* size);
+		[id(10), helpstring("method GetAudioChunkInfo returns a position & size of audio frame")] 
+			HRESULT GetAudioChunkInfo([in] long index, [in] long chunk_number, [out] long* hi_offset, [out] ULONG* low_offset, [out] ULONG* size);
+		[id(11), helpstring("method GetVideoFormatInfo returns BITMAPINFOHEADER for video stream")] 
+			HRESULT GetVideoFormatInfo([in] long index, [out,size_is(buf_size),length_is(*copy_size)] BYTE* format_info, [in] long buf_size, [out] long* copy_size);
+		[id(12), helpstring("method GetAudioFormatInfo returns WAVEFORMAT for audio stream")] 
+			HRESULT GetAudioFormatInfo([in] long index, [out,size_is(buf_size),length_is(*copy_size)] BYTE* format_info, [in] long buf_size, [out] long* copy_size);
+		[id(13), helpstring("method GetVideoExtFormatInfo returns extended format info for video stream")] 
+			HRESULT GetVideoExtFormatInfo([in] long index, [out,size_is(buf_size),length_is(*copy_size)] BYTE* format_info, [in] long buf_size, [out] long* copy_size);
+		[id(14), helpstring("method GetAudioSampleInfo returns number of audio chunk & offset in the chunk of audio sample")] 
+			HRESULT GetAudioSampleInfo([in] long index, [in] UINT sample_number, [out] UINT* chunk_num, [out] UINT* offset);
+		[id(15), helpstring("method GetMainHeader returns MainAVIHeader")] 
+			HRESULT GetMainHeader([out,size_is(buf_size),length_is(*copy_size)] BYTE* buffer, [in] long buf_size, [out] long* copy_size);
+		[id(16), helpstring("method GetVideoFrameInfo2 returns a position, size & flags of video frame")] 
+			HRESULT GetVideoFrameInfo2([in] long index, [in] long frame_number, [out] long* hi_offset, [out] ULONG* low_offset, [out] ULONG* size, [out] ULONG* flags);
+		[id(17), helpstring("method GetAudioChunkInfo2 returns a position, size & flags of audio frame")] 
+			HRESULT GetAudioChunkInfo2([in] long index, [in] long chunk_number, [out] long* hi_offset, [out] ULONG* low_offset, [out] ULONG* size, [out] ULONG* flags);
+		[id(18), helpstring("method FastLoad fast loads AVI-file")] 
+			HRESULT FastLoad([in] BSTR file_name);
+	};
+	[
+		object,
+		uuid(0B2189C1-8738-4959-AF7A-B6B86AD0644D),
+		dual,
+		helpstring("IGetAVIInfo2 Interface"),
+		pointer_default(unique)
+	]
+	interface IGetAVIInfo2 : IGetAVIInfo
+	{
+		[id(19), helpstring("method FastLoadStream fast loads AVI-file from the IStream interface")] 
+			HRESULT FastLoadStream([in] BSTR file_name, [in] IUnknown *pIStream);
+	}
+
+    [
+        object,
+        uuid(2B663AC9-1532-4f32-8631-EDBF22440DF4),
+        helpstring("IGetAVIInfoArray Interface"),
+        pointer_default(unique)
+    ]
+    interface IGetAVIInfoArray : IUnknown
+    {
+		[helpstring("method GetVideoFramesInfo return standart AVIINDEXENTRY info and hi part of file offset for specified video frames")] 
+			HRESULT GetVideoFramesInfo([in] long index, [in] long start_frame, [in] long frames_count, [out,size_is(frames_count)] IndexFileEntry *info, [out,size_is(frames_count)] long *hi_offset);
+		[helpstring("method GetAudioChunksInfo return standart AVIINDEXENTRY info and hi part of file offset for specified audio chunks")] 
+			HRESULT GetAudioChunksInfo([in] long index, [in] long start_chunk, [in] long chunks_count, [out,size_is(chunks_count)] IndexFileEntry *info, [out,size_is(chunks_count)] long *hi_offset);
+    };
+    [
+        object,
+        uuid(F8CA2B89-3B58-497e-A8FA-CAD6F67DD7AD),
+        helpstring("IGetAVIInfoEx Interface"),
+        pointer_default(unique)
+    ]
+	interface IGetAVIInfoEx : IUnknown
+	{
+		[helpstring("method LoadMBSTR")] HRESULT LoadMBSTR([in, size_is(size)]CHAR* file_name, [in]long size, [in, defaultvalue(1)]long bFastLoad);
+	}
+
+    [
+        object,
+        uuid(E6918976-06A3-4899-ACF7-4060DDE9569E),
+        helpstring("IGetDVAudio Interface"),
+        pointer_default(unique)
+    ]
+	interface IGetDVAudio : IUnknown
+	{
+		[helpstring("method GetAudioFormat")] HRESULT GetAudioFormat([out, size_is(nFmtSize)]BYTE* pWFX,[in]long nFmtSize);
+		[helpstring("method GetAudioBufSize")] HRESULT GetAudioBufSize([out]long* pnAudioBufSize);
+		[helpstring("method GetChunkBufSize")] HRESULT GetChunkBufSize([out]long* pnFrameBufSize);
+		[helpstring("method GetNumChunkByTime")] HRESULT GetNumChunkByTime([in]double dMarkInSec,[out]long* pnChunk,[out]long* nSkipOutBytes);
+		[helpstring("method GetNumChunkBySample")] HRESULT GetNumChunkBySample([in]long nSample,[out]long* pnChunk,[out]long* nSkipOutBytes);
+		[helpstring("method ExtractAudio")] HRESULT ExtractAudio([in]long nChunk,[in, size_is(nDVSize)]BYTE* pDVData,[in]long nDVSize,[out,size_is(nAudioBufSize)]BYTE* pAudioData,[in]long nAudioBufSize,[out]long* pnAudioDataSize);
+	}
+
+    [
+        object,
+        uuid(8CE4A353-53FB-448d-9FFC-8867140F4096),
+        helpstring("IGetDVInfo Interface"),
+        pointer_default(unique)
+    ]
+	interface IGetDVInfo : IUnknown
+	{
+		[helpstring("method GetAspectRatio")] HRESULT GetAspectRatio([in] long nFrameSize, [in,size_is(nFrameSize)] BYTE* pFrameData, [out] BOOL* pb16_9, [out] BYTE* pARFlags);
+		[helpstring("method GetFrameAspectRatio")] HRESULT GetFrameAspectRatio([in] long nFrame, [out] BOOL* pb16_9, [out] BYTE* pARFlags);
+		[helpstring("method GetTimeCode")] HRESULT GetTimeCode([in] long nFrameSize, [in,size_is(nFrameSize)] BYTE* pFrameData, [out] long* pnHour, [out] long* pnMin, [out] long* pnSec, [out] long* pnFr);
+		[helpstring("method GetFrameTimeCode")] HRESULT GetFrameTimeCode([in] long nFrame, [out] long* pnHour, [out] long* pnMin, [out] long* pnSec, [out] long* pnFr);
+		[helpstring("method GetRecDateTime")] HRESULT GetRecDateTime([in] long nFrameSize, [in,size_is(nFrameSize)] BYTE* pFrameData, [out] long* pnYear, [out] long* pnMonth, [out] long* pnDay, [out] long* pnHour, [out] long* pnMin, [out] long* pnSec);
+		[helpstring("method GetFrameRecDateTime")] HRESULT GetFrameRecDateTime([in] long nFrame, [out] long* pnYear, [out] long* pnMonth, [out] long* pnDay, [out] long* pnHour, [out] long* pnMin, [out] long* pnSec);
+	}
+
+[
+	uuid(568DF441-DEAC-11D3-BBEE-0000B4908D28),
+	version(1.1),
+	helpstring("GetAVIInfo 1.1 Type Library")
+]
+library GETAVIINFOLib
+{
+	importlib("stdole32.tlb");
+	importlib("stdole2.tlb");
+
+	[
+		uuid(568DF44F-DEAC-11D3-BBEE-0000B4908D28),
+		helpstring("GetAVIInfo Class")
+	]
+	coclass GetAVIInfo
+	{
+		[default] interface IGetAVIInfo2;
+		interface IGetAVIInfo;
+		interface IGetAVIInfoOld;
+		interface IGetAVIInfoArray;
+		interface IGetAVIInfoEx;
+		interface IGetDVAudio;
+		interface IGetDVInfo;
+	};
+};
