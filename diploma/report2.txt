@@ -1,0 +1,10 @@
+¬ следующих двух ссылках на вопрос, каким образо можно идентифицировать лица даетс€ примерно один о тот же ответ - используйте библиотеку OpenCV дл€ поиска лиц и алгоритм Eigenface дл€ опознани€
+https://stackoverflow.com/questions/5597302/face-identification-with-opencv
+https://stackoverflow.com/questions/953714/face-recognition-library?rq=1
+
+
+
+
+Eigenface
+»спользуетс€ метод главных компонент. ѕро него очень много написано в большом количестве статей, но, в основном, написано сложно. ¬ следующей ссылке этот метод описываетс€ "на пальцах", очень легко и пон€тно
+http://math-info.hse.ru/f/2015-16/ling-mag-quant/lecture-pca.html
