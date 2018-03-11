@@ -6,6 +6,6 @@ using namespace std;
 		cout << messageOk << endl; \
 	} else { \
 		cout << messageError << endl; \
+		system("pause"); \
+		return result; \
 	} \
-	system("pause"); \
-	return result; \
