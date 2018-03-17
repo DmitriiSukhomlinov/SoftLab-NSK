@@ -120,10 +120,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Consts.cpp" />
+    <ClCompile Include="InputHandlers.cpp" />
     <ClCompile Include="Macros.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Settings.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Settings.h" />
+    <ClInclude Include="InputHandlers.h" />
     <ClInclude Include="LuxandFaceSDK.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
