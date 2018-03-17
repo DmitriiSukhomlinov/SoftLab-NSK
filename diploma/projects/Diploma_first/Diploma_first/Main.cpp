@@ -5,6 +5,8 @@
 #include "Consts.cpp"
 #include "Macros.cpp"
 
+#include <chrono>
+
 int main() {
     //This value is expected to use as a return value for all framework functions 
     int result = -1;
@@ -37,7 +39,32 @@ int main() {
     CHECK_PAUSE(result == FSDKE_OK, "The threshold was setted correctly",
                                     "Face detection threshold wasn't setted");
 
+    //The struct represent 70 points of the face
+    FSDK_Features* features = new FSDK_Features[FSDK_FACIAL_FEATURE_COUNT];
+    result = FSDK_DetectFacialFeatures(*image, features);
+    CHECK_RETURN(result == FSDKE_OK, "Facial features was defined corectly",
+                                     "Facial features weren't setted", 0);
+
+    CHECK_RETURN(features != nullptr, "Facial-features pointer was created sucsessfully",
+                                      "Unexpected behavior, Facial-features pointer is null",
+                                      0);
+
+    TFacePosition* fasePosition = new TFacePosition;
+    auto startDetectFace = GetTickCount();//Use std::chrono hete
+    result = FSDK_DetectFace(*image, fasePosition);
+    auto finishDetectFace = GetTickCount();
+    CHECK_RETURN(result == FSDKE_OK, "Face position was defined corectly",
+                                     "Face position weren't setted", 0);
+    CHECK_RETURN(fasePosition != nullptr, "Face position pointer was created sucsessfully",
+                                          "Unexpected behavior, Face position pointer is null",
+                                          0);
+    cout << "Time for the face detecting = " << finishDetectFace - startDetectFace  
+         << " milliseconds" << endl;
+
 
     system("pause");
+    delete image;
+    delete[] features;
+    delete fasePosition;
     return 0;
 }
