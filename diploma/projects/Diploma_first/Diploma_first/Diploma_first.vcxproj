@@ -124,11 +124,13 @@
     <ClCompile Include="Macros.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Settings.cpp" />
+    <ClCompile Include="TimeChecker.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Settings.h" />
     <ClInclude Include="InputHandlers.h" />
     <ClInclude Include="LuxandFaceSDK.h" />
+    <ClInclude Include="TimeChecker.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

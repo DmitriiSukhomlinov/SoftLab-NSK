@@ -286,3 +286,6 @@ __pycache__/
 *.btm.cs
 *.odx.cs
 *.xsd.cs
+
+# Directories I want to ignore
+diploma/projects/Diploma_first/Diploma_first/samples/Me
