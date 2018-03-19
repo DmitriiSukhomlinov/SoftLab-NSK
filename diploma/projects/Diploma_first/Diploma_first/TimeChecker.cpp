@@ -1,8 +1,16 @@
 #include "TimeChecker.h"
 
+#include <cassert>
 #include <iostream>
 
 TimeChecker::TimeChecker() : start(steady_clock::now()), wasStarted(false) {}
+
+template <typename T>
+long long TimeChecker::defineTime() {
+    const auto finish = steady_clock::now();
+    const auto elapsed = duration_cast<T>(finish - start);
+    return elapsed.count();
+}
 
 void TimeChecker::startTimer(string _actionName) {
     start = steady_clock::now();
@@ -16,29 +24,31 @@ void TimeChecker::checkTimer(ChronoType type) {
         return;
     }
 
-    const auto finish = steady_clock::now();
-    auto elapsed = start.time_since_epoch();
+    long long time = -1;
     string timeType;
-    switch (type) {//Smt wrong with microseconds
+    switch (type) {
     case Nanoseconds:
-        elapsed = duration_cast<nanoseconds>(finish - start);
+        time = defineTime<nanoseconds>();
         timeType = " nanoseconds";
         break;
     case Microseconds:
-        elapsed = duration_cast<microseconds>(finish - start);
+        time = defineTime<microseconds>();
         timeType = " microseconds";
         break;
     case Milliseconds:
-        elapsed = duration_cast<milliseconds>(finish - start);
+        time = defineTime<milliseconds>();
         timeType = " milliseconds";
         break;
     case Seconds:
-        elapsed = duration_cast<seconds>(finish - start);
+        time = defineTime<seconds>();
         timeType = " seconds";
+        break;
+    default:
+        assert(false);
         break;
     }
     cout << "Time for the '" << actionName << "' operation = " 
-         << elapsed.count() << timeType << endl;
+         << time << timeType << endl;
 
     actionName.clear();
     wasStarted = false;

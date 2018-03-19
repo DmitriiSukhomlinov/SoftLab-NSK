@@ -24,6 +24,9 @@ public:
     void checkTimer(ChronoType type);
 
 private:
+    template <typename T>
+    long long defineTime();
+
     steady_clock::time_point start;
     string actionName;
     bool wasStarted;

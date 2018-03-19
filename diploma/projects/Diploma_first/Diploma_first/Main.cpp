@@ -6,6 +6,8 @@
 #include "Consts.cpp"
 #include "Macros.cpp"
 
+#include <memory>
+
 int main() {
     //This value is expected to use as a return value for all framework functions 
     int result = -1;
@@ -22,18 +24,18 @@ int main() {
                                      "Initialization error", 0);
 
     //Pointer to the library performance of the sample picture
-    HImage* image1 = new HImage;
+    shared_ptr<HImage> image1(new HImage);
     //Creatiing the library performance of the sample picture
-    result = FSDK_LoadImageFromFile(image1, sampleMe3);
+    result = FSDK_LoadImageFromFile(image1.get(), sampleMe3);
     CHECK_RETURN(result == FSDKE_OK, "The sample was successfully loaded",
                                      "Sample loading error", 0);
     CHECK_RETURN(image1 != nullptr, "Image pointer was created sucsessfully",
                                    "Unexpected behavior, image pointer is null",
                                    0);
 
-    HImage* image2 = new HImage;
+    shared_ptr<HImage> image2(new HImage);
     //Creatiing the library performance of the sample picture
-    result = FSDK_LoadImageFromFile(image2, sampleMe4);
+    result = FSDK_LoadImageFromFile(image2.get(), sampleMe4);
     CHECK_RETURN(result == FSDKE_OK, "The sample was successfully loaded",
                                      "Sample loading error", 0);
     CHECK_RETURN(image2 != nullptr, "Image pointer was created sucsessfully",
@@ -62,16 +64,16 @@ int main() {
                                           0); */
 
     //Library performance of the face
-    FSDK_FaceTemplate* faceTemplate1 = new FSDK_FaceTemplate;
-    result = FSDK_GetFaceTemplate(*image1, faceTemplate1);
+    shared_ptr<FSDK_FaceTemplate> faceTemplate1(new FSDK_FaceTemplate);
+    result = FSDK_GetFaceTemplate(*image1, faceTemplate1.get());
     CHECK_RETURN(result == FSDKE_OK, "The Face template was successfully defined",
                                      "Face template definding error", 0);
     CHECK_RETURN(faceTemplate1 != nullptr, "Face template pointer was created sucsessfully",
                                     "Unexpected behavior, face template pointer is null",
                                     0);
 
-    FSDK_FaceTemplate* faceTemplate2 = new FSDK_FaceTemplate;
-    result = FSDK_GetFaceTemplate(*image2, faceTemplate2);
+    shared_ptr<FSDK_FaceTemplate> faceTemplate2(new FSDK_FaceTemplate);
+    result = FSDK_GetFaceTemplate(*image2, faceTemplate2.get());
     CHECK_RETURN(result == FSDKE_OK, "The Face template was successfully defined",
                                      "Face template definding error", 0);
     CHECK_RETURN(faceTemplate2 != nullptr, "Face template pointer was created sucsessfully",
@@ -81,7 +83,7 @@ int main() {
     //The similarity of two represented faces
     float similarity = -1.0;
     time.startTimer("Face match");
-    result = FSDK_MatchFaces(faceTemplate1, faceTemplate2, &similarity);
+    result = FSDK_MatchFaces(faceTemplate1.get(), faceTemplate2.get(), &similarity);
     time.checkTimer(TimeChecker::Microseconds);
     CHECK_RETURN(result == FSDKE_OK, "Face mutch operation successfull",
                                      "Face mutch operation error", 0);
@@ -90,11 +92,8 @@ int main() {
     
 
 
+
     system("pause");
-    delete image1;
-    delete image2;
-    delete faceTemplate1;
-    delete faceTemplate2;
     //delete[] features;
     //delete fasePosition;
     return 0;
