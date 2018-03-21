@@ -23,6 +23,14 @@ int main() {
     CHECK_RETURN(result == FSDKE_OK, "Correct initialization of the dll",
                                      "Initialization error", 0);
 
+    result = Settings::setFaceDetectionParametrs();
+    CHECK_PAUSE(result == FSDKE_OK, "The parametrs were setted correctly",
+                                    "Error in the face detection parametrs");
+    
+    result = Settings::setFaceDetectionThreshold();
+    CHECK_PAUSE(result == FSDKE_OK, "The threshold was setted correctly",
+                                    "Face detection threshold wasn't setted");
+
     //Pointer to the library performance of the sample picture
     shared_ptr<HImage> image1(new HImage);
     //Creatiing the library performance of the sample picture
