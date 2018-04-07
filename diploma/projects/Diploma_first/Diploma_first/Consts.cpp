@@ -27,6 +27,19 @@ static std::array<const char*, 10> sampleSame = { "samples/faces/same_faces/1.jp
                                                   "samples/faces/same_faces/9.jpg" ,
                                                   "samples/faces/same_faces/10.jpg" };
 
+static std::array<const char*, 10> sampleSameBlackAndWhite = 
+                                                { "samples/faces/same_black_and_white/1.jpg" ,
+                                                  "samples/faces/same_black_and_white/2.jpg" ,
+                                                  "samples/faces/same_black_and_white/3.jpg" ,
+                                                  "samples/faces/same_black_and_white/4.jpg" ,
+                                                  "samples/faces/same_black_and_white/5.jpg" ,
+                                                  "samples/faces/same_black_and_white/6.jpg" ,
+                                                  "samples/faces/same_black_and_white/7.jpg" ,
+                                                  "samples/faces/same_black_and_white/8.jpg" ,
+                                                  "samples/faces/same_black_and_white/9.jpg" ,
+                                                  "samples/faces/same_black_and_white/10.jpg" };
+
+
 static std::array<const char*, 10> sampleDiff = { "samples/faces/different_faces/1.jpg" ,
                                                   "samples/faces/different_faces/2.jpg" ,
                                                   "samples/faces/different_faces/3.jpg" ,
@@ -37,3 +50,16 @@ static std::array<const char*, 10> sampleDiff = { "samples/faces/different_faces
                                                   "samples/faces/different_faces/8.jpg" ,
                                                   "samples/faces/different_faces/9.jpg" ,
                                                   "samples/faces/different_faces/10.jpg" };
+
+static std::array<const char*, 10> sampleDiffBlackAndWhite = 
+                                                { "samples/faces/different_black_and_white/1.jpg" ,
+                                                  "samples/faces/different_black_and_white/2.jpg" ,
+                                                  "samples/faces/different_black_and_white/3.jpg" ,
+                                                  "samples/faces/different_black_and_white/4.jpg" ,
+                                                  "samples/faces/different_black_and_white/5.jpg" ,
+                                                  "samples/faces/different_black_and_white/6.jpg" ,
+                                                  "samples/faces/different_black_and_white/7.jpg" ,
+                                                  "samples/faces/different_black_and_white/8.jpg" ,
+                                                  "samples/faces/different_black_and_white/9.jpg" ,
+                                                  "samples/faces/different_black_and_white/10.jpg" };
+
