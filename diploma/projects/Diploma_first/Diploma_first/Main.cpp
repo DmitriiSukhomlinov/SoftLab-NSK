@@ -36,11 +36,11 @@ int main() {
                                     "Error in the face detection parametrs");
 
     for (int i = 0; i < 10; i++) {
-        for (int j = 0; j < 10; j++) {
+        for (int j = i; j < 10; j++) {
             //Pointer to the library performance of the sample picture
             shared_ptr<HImage> image1(new HImage);
             //Creatiing the library performance of the sample picture
-            result = FSDK_LoadImageFromFile(image1.get(), samplePaulWalker[i]);
+			result = FSDK_LoadImageFromFile(image1.get(), samplePaulWalkerWithAngle[i]);
             //CHECK_RETURN(result == FSDKE_OK, "The sample was successfully loaded",
             //    "Sample loading error", 0);
             //CHECK_RETURN(image1 != nullptr, "Image pointer was created sucsessfully",
@@ -49,7 +49,7 @@ int main() {
 
             shared_ptr<HImage> image2(new HImage);
             //Creatiing the library performance of the sample picture
-            result = FSDK_LoadImageFromFile(image2.get(), samplePaulWalkerWithAngle[j]);
+			result = FSDK_LoadImageFromFile(image2.get(), samplePaulWalkerWithAngle[j]);
             //CHECK_RETURN(result == FSDKE_OK, "The sample was successfully loaded",
             //    "Sample lading error", 0);
             //CHECK_RETURN(image2 != nullptr, "Image pointer was created sucsessfully",
