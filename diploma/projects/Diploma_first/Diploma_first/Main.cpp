@@ -31,12 +31,12 @@ int main() {
     //CHECK_PAUSE(result == FSDKE_OK, "The threshold was setted correctly",
     //                                "Face detection threshold wasn't setted");
 
-    result = FSDK_SetFaceDetectionParameters(false, false, 384);
+    //result = FSDK_SetFaceDetectionParameters(false, false, 384);
     CHECK_PAUSE(result == FSDKE_OK, "The parametrs were setted correctly",
                                     "Error in the face detection parametrs");
 
     for (int i = 0; i < 10; i++) {
-        for (int j = i; j < 10; j++) {
+        for (int j = 0; j < 10; j++) {
             //Pointer to the library performance of the sample picture
             shared_ptr<HImage> image1(new HImage);
             //Creatiing the library performance of the sample picture
@@ -49,7 +49,7 @@ int main() {
 
             shared_ptr<HImage> image2(new HImage);
             //Creatiing the library performance of the sample picture
-            result = FSDK_LoadImageFromFile(image2.get(), samplePaulWalker[j]);
+            result = FSDK_LoadImageFromFile(image2.get(), samplePaulWalkerWithAngle[j]);
             //CHECK_RETURN(result == FSDKE_OK, "The sample was successfully loaded",
             //    "Sample lading error", 0);
             //CHECK_RETURN(image2 != nullptr, "Image pointer was created sucsessfully",

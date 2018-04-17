@@ -75,4 +75,17 @@ static std::array<const char*, 10> samplePaulWalker =
                                                   "samples/faces/paul_walker/9.jpg",
                                                   "samples/faces/paul_walker/10.jpg" };
 
+static std::array<const char*, 10> samplePaulWalkerWithAngle =
+                                                { "samples/faces/paul_walker_with_angle/1.jpg",
+                                                  "samples/faces/paul_walker_with_angle/2.jpg",
+                                                  "samples/faces/paul_walker_with_angle/3.jpg",
+                                                  "samples/faces/paul_walker_with_angle/4.jpg",
+                                                  "samples/faces/paul_walker_with_angle/5.jpg",
+                                                  "samples/faces/paul_walker_with_angle/6.jpg",
+                                                  "samples/faces/paul_walker_with_angle/7.jpg",
+                                                  "samples/faces/paul_walker_with_angle/8.jpg",
+                                                  "samples/faces/paul_walker_with_angle/9.jpg",
+                                                  "samples/faces/paul_walker_with_angle/10.jpg" };
+
+
 
