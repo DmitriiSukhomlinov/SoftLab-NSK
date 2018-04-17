@@ -63,3 +63,16 @@ static std::array<const char*, 10> sampleDiffBlackAndWhite =
                                                   "samples/faces/different_black_and_white/9.jpg" ,
                                                   "samples/faces/different_black_and_white/10.jpg" };
 
+static std::array<const char*, 10> samplePaulWalker =
+                                                { "samples/faces/paul_walker/1.jpg",
+                                                  "samples/faces/paul_walker/2.png",
+                                                  "samples/faces/paul_walker/3.png",
+                                                  "samples/faces/paul_walker/4.jpg",
+                                                  "samples/faces/paul_walker/5.jpg",
+                                                  "samples/faces/paul_walker/6.jpg",
+                                                  "samples/faces/paul_walker/7.jpg",
+                                                  "samples/faces/paul_walker/8.jpg",
+                                                  "samples/faces/paul_walker/9.jpg",
+                                                  "samples/faces/paul_walker/10.jpg" };
+
+
