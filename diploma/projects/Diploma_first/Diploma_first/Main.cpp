@@ -40,7 +40,7 @@ int main() {
             //Pointer to the library performance of the sample picture
             shared_ptr<HImage> image1(new HImage);
             //Creatiing the library performance of the sample picture
-			result = FSDK_LoadImageFromFile(image1.get(), samplePaulWalkerWithAngle[i]);
+			result = FSDK_LoadImageFromFile(image1.get(), samplePaulWalker [i]);
             //CHECK_RETURN(result == FSDKE_OK, "The sample was successfully loaded",
             //    "Sample loading error", 0);
             //CHECK_RETURN(image1 != nullptr, "Image pointer was created sucsessfully",
