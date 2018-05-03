@@ -23,6 +23,27 @@ int main() {
     CHECK_RETURN(result == FSDKE_OK, "Correct initialization of the dll",
                                      "Initialization error", 0);
 
+	shared_ptr<HTracker> tracker(new HTracker);
+	result = FSDK_CreateTracker(tracker.get());
+	CHECK_RETURN(result == FSDKE_OK, "Tracker was created",
+									"Tracker was not created", 0);
+
+
+
+
+
+
+
+
+
+
+
+
+	system("pause");
+	return 0;
+
+
+
     //result = Settings::setFaceDetectionParametrs();
     //CHECK_PAUSE(result == FSDKE_OK, "The parametrs were setted correctly",
     //                                "Error in the face detection parametrs");
@@ -35,7 +56,7 @@ int main() {
     CHECK_PAUSE(result == FSDKE_OK, "The parametrs were setted correctly",
                                     "Error in the face detection parametrs");
 
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 0; i++) {
         for (int j = i; j < 10; j++) {
             //Pointer to the library performance of the sample picture
             shared_ptr<HImage> image1(new HImage);
