@@ -1,6 +1,6 @@
 #include <array>
 
-static const char* key = "OGObpkvXCrfHElL9WEBXFpuQJKKAHYH7x3RhCCx5pPIlC3Dhs3uZ6IcSZOdbaGZ85xAyP2Y13Lvh+UYBdMnXdnPHD7Nox08lGz7CaKye8Kle+AK7evFqLUkSPOH83PG4FTYqAKnw5SdinVo0SK1yng0PiJKCpYOjPK2qNEqKPAE=";
+static const char* key = "IlGjnMGtkEfv0Ds/kk1+P6p9D7a0LAOoXIHHdLpFV88wArBFV26/ExenoUXv8g2TvnkB0RIvERo3QquT4cy2BgRKHfBJNmi7xzlxc2oZbRnWK/9BHhcCfV13njdIOmIgCzg3xwORfv7ezjUmud5OiFCYEq+UjYT2kdZats0vqwI=";
 
 //The path to the facesdk.dll
 //Null pointer means current directory
