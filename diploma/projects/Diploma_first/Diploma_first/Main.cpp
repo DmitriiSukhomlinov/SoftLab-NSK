@@ -26,23 +26,7 @@ int main() {
 	shared_ptr<HTracker> tracker(new HTracker);
 	result = FSDK_CreateTracker(tracker.get());
 	CHECK_RETURN(result == FSDKE_OK, "Tracker was created",
-									"Tracker was not created", 0);
-
-
-
-
-
-
-
-
-
-
-
-
-	system("pause");
-	return 0;
-
-
+									 "Tracker was not created", 0);
 
     //result = Settings::setFaceDetectionParametrs();
     //CHECK_PAUSE(result == FSDKE_OK, "The parametrs were setted correctly",
@@ -53,58 +37,45 @@ int main() {
     //                                "Face detection threshold wasn't setted");
 
     //result = FSDK_SetFaceDetectionParameters(false, false, 384);
-    CHECK_PAUSE(result == FSDKE_OK, "The parametrs were setted correctly",
-                                    "Error in the face detection parametrs");
+    //CHECK_PAUSE(result == FSDKE_OK, "The parametrs were setted correctly",
+    //                                "Error in the face detection parametrs");
 
-    for (int i = 0; i < 0; i++) {
+    TimeChecker checker;
+    for (int i = 0; i < 1; i++) {
         for (int j = i; j < 10; j++) {
-            //Pointer to the library performance of the sample picture
+
+            //checker.startTimer("Load first image");
             shared_ptr<HImage> image1(new HImage);
-            //Creatiing the library performance of the sample picture
-			result = FSDK_LoadImageFromFile(image1.get(), samplePaulWalker [i]);
-            //CHECK_RETURN(result == FSDKE_OK, "The sample was successfully loaded",
-            //    "Sample loading error", 0);
-            //CHECK_RETURN(image1 != nullptr, "Image pointer was created sucsessfully",
-            //    "Unexpected behavior, image pointer is null",
-            //    0);
+            result = FSDK_LoadImageFromFile(image1.get(), samplePaulWalker[j]);
+            //checker.checkTimer(TimeChecker::Milliseconds);
 
-            shared_ptr<HImage> image2(new HImage);
-            //Creatiing the library performance of the sample picture
-			result = FSDK_LoadImageFromFile(image2.get(), samplePaulWalkerWithAngle[j]);
-            //CHECK_RETURN(result == FSDKE_OK, "The sample was successfully loaded",
-            //    "Sample lading error", 0);
-            //CHECK_RETURN(image2 != nullptr, "Image pointer was created sucsessfully",
-            //    "Unexpected behavior, image pointer is null",
-            //    0);
-
-
-            //Library performance of the face
+            checker.startTimer("Get first face template");
             shared_ptr<FSDK_FaceTemplate> faceTemplate1(new FSDK_FaceTemplate);
             result = FSDK_GetFaceTemplate(*image1, faceTemplate1.get());
-            //CHECK_RETURN(result == FSDKE_OK, "The Face template was successfully defined",
-            //    "Face template definding error", 0);
-            //CHECK_RETURN(faceTemplate1 != nullptr, "Face template pointer was created sucsessfully",
-            //    "Unexpected behavior, face template pointer is null",
-            //    0);
+            checker.checkTimer(TimeChecker::Milliseconds);
 
+
+            //checker.startTimer("Load second image");
+            shared_ptr<HImage> image2(new HImage);
+            result = FSDK_LoadImageFromFile(image2.get(), samplePaulWalkerWithAngle[j]);
+            //checker.checkTimer(TimeChecker::Milliseconds);
+
+            checker.startTimer("Get second face template");
             shared_ptr<FSDK_FaceTemplate> faceTemplate2(new FSDK_FaceTemplate);
             result = FSDK_GetFaceTemplate(*image2, faceTemplate2.get());
-            //CHECK_RETURN(result == FSDKE_OK, "The Face template was successfully defined",
-            //    "Face template definding error", 0);
-            //CHECK_RETURN(faceTemplate2 != nullptr, "Face template pointer was created sucsessfully",
-            //    "Unexpected behavior, face template pointer is null",
-            //    0);
+            checker.checkTimer(TimeChecker::Milliseconds);
 
+
+            //checker.startTimer("Match faces");
             float similarity = -1.0;
             result = FSDK_MatchFaces(faceTemplate1.get(), faceTemplate2.get(), &similarity);
-            //CHECK_RETURN(result == FSDKE_OK, "Face mutch operation successfull",
-            //                                 "Face mutch operation error", 0);
+            //checker.checkTimer(TimeChecker::Nanoseconds);
+
             
-            //if (similarity > 0.4 && i != j) {
-                cout << "Similarity of " << i + 1 << " and " << j + 1 << " is " << similarity << endl;
-            //}
+            //cout << "Similarity of " << i + 1 << " and " << j + 1 << " is " << similarity << endl;
+            cout << endl;
         }
-        cout << endl << endl;
+        //cout << endl << endl;
     }
     
 

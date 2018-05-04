@@ -19,7 +19,7 @@ public:
     };
 
     //Start point of the measurement
-    void startTimer(string _actionName);
+    void startTimer(string _actionName = "Noname_action");
     //Finish point. The function prints time since start in milliseconds
     void checkTimer(ChronoType type);
 
