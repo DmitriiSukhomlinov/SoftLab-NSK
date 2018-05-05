@@ -28,6 +28,14 @@ int main() {
 	CHECK_RETURN(result == FSDKE_OK, "Tracker was created",
 									 "Tracker was not created", 0);
 
+    const char * parametrs = "HandleArbitraryRotations=false[;DetermineFaceRotationAngle=false[;InternalResizeWidth=256]]";
+    int errorPosition = -1;
+    result = FSDK_SetTrackerMultipleParameters(*tracker.get(), parametrs, &errorPosition);
+    CHECK_RETURN(result == FSDKE_OK, "Tracker parametrs was setted correctly",
+                                     "Tracker parametrs was setted incorrectly", 0);
+
+
+
     //result = Settings::setFaceDetectionParametrs();
     //CHECK_PAUSE(result == FSDKE_OK, "The parametrs were setted correctly",
     //                                "Error in the face detection parametrs");
@@ -36,49 +44,54 @@ int main() {
     //CHECK_PAUSE(result == FSDKE_OK, "The threshold was setted correctly",
     //                                "Face detection threshold wasn't setted");
 
-    //result = FSDK_SetFaceDetectionParameters(false, false, 384);
+    result = FSDK_SetFaceDetectionParameters(false, false, 384);
     //CHECK_PAUSE(result == FSDKE_OK, "The parametrs were setted correctly",
     //                                "Error in the face detection parametrs");
-
+    long long resultTime = 0;
     TimeChecker checker;
-    for (int i = 0; i < 1; i++) {
-        for (int j = i; j < 10; j++) {
+    for (int i = 0; i < 10; i++) {
+        for (int j = 0; j < 10; j++) {
 
             //checker.startTimer("Load first image");
             shared_ptr<HImage> image1(new HImage);
-            result = FSDK_LoadImageFromFile(image1.get(), samplePaulWalker[j]);
+            result = FSDK_LoadImageFromFile(image1.get(), samplePaulWalker[i]);
             //checker.checkTimer(TimeChecker::Milliseconds);
 
-            checker.startTimer("Get first face template");
+            //checker.startTimer("Get first face template");
             shared_ptr<FSDK_FaceTemplate> faceTemplate1(new FSDK_FaceTemplate);
             result = FSDK_GetFaceTemplate(*image1, faceTemplate1.get());
-            checker.checkTimer(TimeChecker::Milliseconds);
+            //checker.checkTimer(TimeChecker::Milliseconds);
 
+            if (result != 0) {
+                int qwe = 0;
+            }
 
             //checker.startTimer("Load second image");
             shared_ptr<HImage> image2(new HImage);
-            result = FSDK_LoadImageFromFile(image2.get(), samplePaulWalkerWithAngle[j]);
+            result = FSDK_LoadImageFromFile(image2.get(), samplePaulWalker[j]);
             //checker.checkTimer(TimeChecker::Milliseconds);
 
-            checker.startTimer("Get second face template");
+            //checker.startTimer("Get second face template");
             shared_ptr<FSDK_FaceTemplate> faceTemplate2(new FSDK_FaceTemplate);
             result = FSDK_GetFaceTemplate(*image2, faceTemplate2.get());
-            checker.checkTimer(TimeChecker::Milliseconds);
+            //checker.checkTimer(TimeChecker::Milliseconds);
+            if (result != 0) {
+                int qwe = 0;
+            }
 
-
-            //checker.startTimer("Match faces");
+            checker.startTimer("Match faces");
             float similarity = -1.0;
             result = FSDK_MatchFaces(faceTemplate1.get(), faceTemplate2.get(), &similarity);
-            //checker.checkTimer(TimeChecker::Nanoseconds);
+            resultTime += checker.checkTimer(TimeChecker::Microseconds);
 
             
-            //cout << "Similarity of " << i + 1 << " and " << j + 1 << " is " << similarity << endl;
-            cout << endl;
+            cout << "Similarity of " << i + 1 << " and " << j + 1 << " is " << similarity << endl;
+            //cout << endl;
         }
         //cout << endl << endl;
     }
     
-
+    cout << "Result time " << resultTime << " microseconds" << endl;
 /*
     //The struct represent 70 points of the face
     FSDK_Features* features = new FSDK_Features[FSDK_FACIAL_FEATURE_COUNT];
@@ -114,7 +127,5 @@ int main() {
 
 
     system("pause");
-    //delete[] features;
-    //delete fasePosition;
     return 0;
 }

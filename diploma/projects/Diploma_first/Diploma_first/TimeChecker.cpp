@@ -18,10 +18,10 @@ void TimeChecker::startTimer(string _actionName) {
     wasStarted = true;
 }
 
-void TimeChecker::checkTimer(ChronoType type) {
+long long TimeChecker::checkTimer(ChronoType type) {
     if (!wasStarted) {
         cout << "Timer error! Timer was not setted" << endl;
-        return;
+        return 0;
     }
 
     long long time = -1;
@@ -52,5 +52,6 @@ void TimeChecker::checkTimer(ChronoType type) {
 
     actionName.clear();
     wasStarted = false;
+    return time;
 }
 
