@@ -44,17 +44,83 @@ int main() {
     //CHECK_PAUSE(result == FSDKE_OK, "The threshold was setted correctly",
     //                                "Face detection threshold wasn't setted");
 
-    result = FSDK_SetFaceDetectionParameters(false, false, 384);
+    //result = FSDK_SetFaceDetectionParameters(false, false, 384);
     //CHECK_PAUSE(result == FSDKE_OK, "The parametrs were setted correctly",
     //                                "Error in the face detection parametrs");
+
+    shared_ptr<HImage> image1(new HImage);
+    result = FSDK_LoadImageFromFile(image1.get(), resolutionTestFirstPic);
+
+    shared_ptr<FSDK_FaceTemplate> faceTemplate1(new FSDK_FaceTemplate);
+    result = FSDK_GetFaceTemplate(*image1, faceTemplate1.get());
+
+
+    shared_ptr<HImage> image2(new HImage);
+    result = FSDK_LoadImageFromFile(image2.get(), resolutionTestSecondPic);
+
+    shared_ptr<FSDK_FaceTemplate> faceTemplate2(new FSDK_FaceTemplate);
+    result = FSDK_GetFaceTemplate(*image2, faceTemplate2.get());
+
+
+    float similarity = -1.0;
+    result = FSDK_MatchFaces(faceTemplate1.get(), faceTemplate2.get(), &similarity);
+    cout << "Similarity of samples is " << similarity << endl;
+
+    cout << endl;
+
+    for (int i = 0; i < 10; i++) {
+        shared_ptr<HImage> imagePic(new HImage);
+        result = FSDK_LoadImageFromFile(imagePic.get(), resolutionTestFirstGood[i]);
+
+        shared_ptr<FSDK_FaceTemplate> faceTemplatePic(new FSDK_FaceTemplate);
+        result = FSDK_GetFaceTemplate(*imagePic, faceTemplatePic.get());
+
+        result = FSDK_MatchFaces(faceTemplate2.get(), faceTemplatePic.get(), &similarity);
+        cout << "Similarity of sample and good " << i + 1 << " is " << similarity << endl;
+    }
+
+    cout << endl;
+
+    for (int i = 0; i < 10; i++) {
+        shared_ptr<HImage> imagePic(new HImage);
+        result = FSDK_LoadImageFromFile(imagePic.get(), resolutionTestFirstMid[i]);
+
+        shared_ptr<FSDK_FaceTemplate> faceTemplatePic(new FSDK_FaceTemplate);
+        result = FSDK_GetFaceTemplate(*imagePic, faceTemplatePic.get());
+
+        result = FSDK_MatchFaces(faceTemplate2.get(), faceTemplatePic.get(), &similarity);
+        cout << "Similarity of sample and mid " << i + 1 << " is " << similarity << endl;
+    }
+
+    cout << endl;
+
+    for (int i = 0; i < 10; i++) {
+        shared_ptr<HImage> imagePic(new HImage);
+        result = FSDK_LoadImageFromFile(imagePic.get(), resolutionTestFirstLow[i]);
+
+        shared_ptr<FSDK_FaceTemplate> faceTemplatePic(new FSDK_FaceTemplate);
+        result = FSDK_GetFaceTemplate(*imagePic, faceTemplatePic.get());
+
+        result = FSDK_MatchFaces(faceTemplate2.get(), faceTemplatePic.get(), &similarity);
+        cout << "Similarity of sample and low " << i + 1 << " is " << similarity << endl;
+    }
+
+    cout << endl;
+
+
+    system("pause");
+    return 0;
+
     long long resultTime = 0;
     TimeChecker checker;
+    TimeChecker checkerForLoop;
+    checkerForLoop.startTimer("Loop");
     for (int i = 0; i < 10; i++) {
         for (int j = 0; j < 10; j++) {
 
             //checker.startTimer("Load first image");
             shared_ptr<HImage> image1(new HImage);
-            result = FSDK_LoadImageFromFile(image1.get(), samplePaulWalker[i]);
+            result = FSDK_LoadImageFromFile(image1.get(), samplePaulWalkerMixed[i]);
             //checker.checkTimer(TimeChecker::Milliseconds);
 
             //checker.startTimer("Get first face template");
@@ -62,27 +128,20 @@ int main() {
             result = FSDK_GetFaceTemplate(*image1, faceTemplate1.get());
             //checker.checkTimer(TimeChecker::Milliseconds);
 
-            if (result != 0) {
-                int qwe = 0;
-            }
-
             //checker.startTimer("Load second image");
             shared_ptr<HImage> image2(new HImage);
-            result = FSDK_LoadImageFromFile(image2.get(), samplePaulWalker[j]);
+            result = FSDK_LoadImageFromFile(image2.get(), samplePaulWalkerMixed[j]);
             //checker.checkTimer(TimeChecker::Milliseconds);
 
             //checker.startTimer("Get second face template");
             shared_ptr<FSDK_FaceTemplate> faceTemplate2(new FSDK_FaceTemplate);
             result = FSDK_GetFaceTemplate(*image2, faceTemplate2.get());
             //checker.checkTimer(TimeChecker::Milliseconds);
-            if (result != 0) {
-                int qwe = 0;
-            }
 
-            checker.startTimer("Match faces");
+            //checker.startTimer("Match faces");
             float similarity = -1.0;
             result = FSDK_MatchFaces(faceTemplate1.get(), faceTemplate2.get(), &similarity);
-            resultTime += checker.checkTimer(TimeChecker::Microseconds);
+            //resultTime += checker.checkTimer(TimeChecker::Microseconds);
 
             
             cout << "Similarity of " << i + 1 << " and " << j + 1 << " is " << similarity << endl;
@@ -90,8 +149,8 @@ int main() {
         }
         //cout << endl << endl;
     }
-    
-    cout << "Result time " << resultTime << " microseconds" << endl;
+    checkerForLoop.checkTimer(TimeChecker::Seconds);
+   // cout << "Result time " << resultTime << " microseconds" << endl;
 /*
     //The struct represent 70 points of the face
     FSDK_Features* features = new FSDK_Features[FSDK_FACIAL_FEATURE_COUNT];
