@@ -139,26 +139,41 @@ static std::array<const char*, 10> resolutionTestFirstLow =
 
 static const char* resolutionTestSecondPic = "samples/faces/resolution_tests/2/1.jpg";
 
-static std::array<const char*, 5> resolutionTestSecondGood =
+static std::array<const char*, 10> resolutionTestSecondGood =
                                                 { "samples/faces/resolution_tests/2/good/1.jpg",
                                                   "samples/faces/resolution_tests/2/good/2.jpg",
                                                   "samples/faces/resolution_tests/2/good/3.jpg",
                                                   "samples/faces/resolution_tests/2/good/4.jpg",
-                                                  "samples/faces/resolution_tests/2/good/5.jpg" };  
+                                                  "samples/faces/resolution_tests/2/good/5.jpg",
+                                                  "samples/faces/resolution_tests/2/good/6.jpg",
+                                                  "samples/faces/resolution_tests/2/good/7.jpg",
+                                                  "samples/faces/resolution_tests/2/good/8.jpg",
+                                                  "samples/faces/resolution_tests/2/good/9.jpg",
+                                                  "samples/faces/resolution_tests/2/good/10.jpg" };  
 
-static std::array<const char*, 5> resolutionTestSecondMid =
+static std::array<const char*, 10> resolutionTestSecondMid =
                                                 { "samples/faces/resolution_tests/2/mid/1.jpg",
                                                   "samples/faces/resolution_tests/2/mid/2.jpg",
                                                   "samples/faces/resolution_tests/2/mid/3.jpg",
                                                   "samples/faces/resolution_tests/2/mid/4.jpg",
-                                                  "samples/faces/resolution_tests/2/mid/5.jpg" };
+                                                  "samples/faces/resolution_tests/2/mid/5.jpg",
+                                                  "samples/faces/resolution_tests/2/mid/6.jpg",
+                                                  "samples/faces/resolution_tests/2/mid/7.jpg",
+                                                  "samples/faces/resolution_tests/2/mid/8.jpg",
+                                                  "samples/faces/resolution_tests/2/mid/9.jpg",
+                                                  "samples/faces/resolution_tests/2/mid/10.jpg" };  
 
-static std::array<const char*, 5> resolutionTestSecondLow =
+static std::array<const char*, 10> resolutionTestSecondLow =
                                                 { "samples/faces/resolution_tests/2/low/1.jpg",
                                                   "samples/faces/resolution_tests/2/low/2.jpg",
                                                   "samples/faces/resolution_tests/2/low/3.jpg",
                                                   "samples/faces/resolution_tests/2/low/4.jpg",
-                                                  "samples/faces/resolution_tests/2/low/5.jpg" };  
+                                                  "samples/faces/resolution_tests/2/low/5.jpg",
+                                                  "samples/faces/resolution_tests/2/low/6.jpg",
+                                                  "samples/faces/resolution_tests/2/low/7.jpg",
+                                                  "samples/faces/resolution_tests/2/low/8.jpg",
+                                                  "samples/faces/resolution_tests/2/low/9.jpg",
+                                                  "samples/faces/resolution_tests/2/low/10.jpg" };  
 
 
 

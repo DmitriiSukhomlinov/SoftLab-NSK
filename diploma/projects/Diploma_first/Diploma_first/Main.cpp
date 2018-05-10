@@ -70,12 +70,12 @@ int main() {
 
     for (int i = 0; i < 10; i++) {
         shared_ptr<HImage> imagePic(new HImage);
-        result = FSDK_LoadImageFromFile(imagePic.get(), resolutionTestFirstGood[i]);
+        result = FSDK_LoadImageFromFile(imagePic.get(), resolutionTestSecondGood[i]);
 
         shared_ptr<FSDK_FaceTemplate> faceTemplatePic(new FSDK_FaceTemplate);
         result = FSDK_GetFaceTemplate(*imagePic, faceTemplatePic.get());
 
-        result = FSDK_MatchFaces(faceTemplate2.get(), faceTemplatePic.get(), &similarity);
+        result = FSDK_MatchFaces(faceTemplate1.get(), faceTemplatePic.get(), &similarity);
         cout << "Similarity of sample and good " << i + 1 << " is " << similarity << endl;
     }
 
@@ -83,12 +83,12 @@ int main() {
 
     for (int i = 0; i < 10; i++) {
         shared_ptr<HImage> imagePic(new HImage);
-        result = FSDK_LoadImageFromFile(imagePic.get(), resolutionTestFirstMid[i]);
+        result = FSDK_LoadImageFromFile(imagePic.get(), resolutionTestSecondMid[i]);
 
         shared_ptr<FSDK_FaceTemplate> faceTemplatePic(new FSDK_FaceTemplate);
         result = FSDK_GetFaceTemplate(*imagePic, faceTemplatePic.get());
 
-        result = FSDK_MatchFaces(faceTemplate2.get(), faceTemplatePic.get(), &similarity);
+        result = FSDK_MatchFaces(faceTemplate1.get(), faceTemplatePic.get(), &similarity);
         cout << "Similarity of sample and mid " << i + 1 << " is " << similarity << endl;
     }
 
@@ -96,12 +96,12 @@ int main() {
 
     for (int i = 0; i < 10; i++) {
         shared_ptr<HImage> imagePic(new HImage);
-        result = FSDK_LoadImageFromFile(imagePic.get(), resolutionTestFirstLow[i]);
+        result = FSDK_LoadImageFromFile(imagePic.get(), resolutionTestSecondLow[i]);
 
         shared_ptr<FSDK_FaceTemplate> faceTemplatePic(new FSDK_FaceTemplate);
         result = FSDK_GetFaceTemplate(*imagePic, faceTemplatePic.get());
 
-        result = FSDK_MatchFaces(faceTemplate2.get(), faceTemplatePic.get(), &similarity);
+        result = FSDK_MatchFaces(faceTemplate1.get(), faceTemplatePic.get(), &similarity);
         cout << "Similarity of sample and low " << i + 1 << " is " << similarity << endl;
     }
 
