@@ -65,15 +65,15 @@ static std::array<const char*, 10> sampleDiffBlackAndWhite =
 
 static std::array<const char*, 10> samplePaulWalker =
                                                 { "samples/faces/paul_walker/1.jpg",
-                                                  "samples/faces/paul_walker/2.png",
-                                                  "samples/faces/paul_walker/3.png",
+                                                  "samples/faces/paul_walker/2.jpg",
+                                                  "samples/faces/paul_walker/3.jpg",
                                                   "samples/faces/paul_walker/4.jpg",
                                                   "samples/faces/paul_walker/5.jpg",
                                                   "samples/faces/paul_walker/6.jpg",
                                                   "samples/faces/paul_walker/7.jpg",
                                                   "samples/faces/paul_walker/8.jpg",
-                                                  "samples/faces/paul_walker/9.jpg",
-                                                  "samples/faces/paul_walker/10.jpg" };
+                                                  "samples/faces/paul_walker/9.png",
+                                                  "samples/faces/paul_walker/10.png" };
 
 static std::array<const char*, 10> samplePaulWalkerWithAngle =
                                                 { "samples/faces/paul_walker_with_angle/1.jpg",
@@ -90,7 +90,7 @@ static std::array<const char*, 10> samplePaulWalkerWithAngle =
 static std::array<const char*, 10> samplePaulWalkerMixed =
                                                 { "samples/faces/paul_walker_mixed/1.jpg",
                                                   "samples/faces/paul_walker_mixed/2.jpg",
-                                                  "samples/faces/paul_walker_mixed/3.png",
+                                                  "samples/faces/paul_walker_mixed/3.jpg",
                                                   "samples/faces/paul_walker_mixed/4.jpg",
                                                   "samples/faces/paul_walker_mixed/5.jpg",
                                                   "samples/faces/paul_walker_mixed/6.jpg",
