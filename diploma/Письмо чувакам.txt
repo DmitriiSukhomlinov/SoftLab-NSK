@@ -1,0 +1,1 @@
+I'm writing a diploma project. It's about face recognizing and comparing the results with the database. I would like to use LuxandSDK in my project. So, if you allow me to use it for free,  it'll be very helpful for me! 
