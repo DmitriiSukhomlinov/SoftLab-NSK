@@ -6,6 +6,7 @@
 #include "Consts.cpp"
 #include "Macros.cpp"
 
+#include <iomanip>
 #include <memory>
 
 
@@ -32,7 +33,7 @@ int main() {
     //CHECK_PAUSE(result == FSDKE_OK, "The threshold was set correctly",
     //                                "Face detection threshold wasn't setted");
 
-    result = FSDK_SetFaceDetectionParameters(false, false, 256);
+    result = FSDK_SetFaceDetectionParameters(false, false, 384);
     CHECK_PAUSE(result == FSDKE_OK, "The parametrs were set correctly",
                                     "Error in the face detection parametrs");
 
@@ -110,11 +111,11 @@ int main() {
     int res = 0;
     checkerForLoop.startTimer("Loop");
     for (int i = 0; i < 10; i++) {
-        for (int j = 0; j < 10; j++) {
+        for (int j = i; j < 10; j++) {
 
             //checker.startTimer("Load first image");
             shared_ptr<HImage> image1(new HImage);
-            result = FSDK_LoadImageFromFile(image1.get(), samplePaulWalker[i]);
+            result = FSDK_LoadImageFromFile(image1.get(), sampleDiff[i]);
             cout << i + 1 << ". ";
             //resultLoadTime += checker.checkTimer(TimeChecker::Milliseconds);
 
@@ -125,7 +126,7 @@ int main() {
 
             //checker.startTimer("Load second image");
             shared_ptr<HImage> image2(new HImage);
-            result = FSDK_LoadImageFromFile(image2.get(), samplePaulWalker[j]);
+            result = FSDK_LoadImageFromFile(image2.get(), sampleDiff[j]);
             //resultLoadTime += checker.checkTimer(TimeChecker::Milliseconds);
 
             //checker.startTimer("Get second face template");
@@ -136,12 +137,12 @@ int main() {
             checker.startTimer("Match faces");
             float similarity = -1.0;
             result = FSDK_MatchFaces(faceTemplate1.get(), faceTemplate2.get(), &similarity);
-            resultMatchTime += checker.checkTimer(TimeChecker::Microseconds);
+           //resultMatchTime += checker.checkTimer(TimeChecker::Microseconds);
 
             if (similarity > 0.6) {
                 res++;
             }
-            //cout << "Similarity of " << i + 1 << " and " << j + 1 << " is " << similarity << endl;
+            cout << "Similarity of " << i + 1 << " and " << j + 1 << " is " << int((similarity + 0.005) * 100) / 100.0 << endl;
             //cout << endl;
         }
         cout << endl;
