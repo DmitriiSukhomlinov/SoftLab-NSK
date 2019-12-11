@@ -4,7 +4,10 @@
 #include <list>
 
 //Аналог FSDK_FaceTemplate из библиотеки
-using FaceTemplate = char[1040];
+using FaceTemplate = char[dataSize];
+
+//Оставлю пока так, как сделать версионность не совсем пока понимаю
+static const int dataSize = 1040;
 
 //Наше описание лица. 
 struct FaceDescription {
