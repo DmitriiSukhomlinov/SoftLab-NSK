@@ -20,7 +20,7 @@ public:
     //Функция, стартующая цикл, в котором будут обрабатываться картинка одна за одной
     void init() override;
     //Доавляем картинку на обработку в цикле
-    void addImage(void* _inputVideoBuffer, const int _xPictureSize, const int _yPictureSize, const int _scanLine, const ColorDepth _colorDepth) override;
+    void addImage(const int frameNumber, void* _inputVideoBuffer, const int _xPictureSize, const int _yPictureSize, const int _scanLine, const ColorDepth _colorDepth) override;
     //Функция, завершающая обработку
     void finish() override;
 
