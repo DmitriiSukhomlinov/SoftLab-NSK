@@ -1,4 +1,5 @@
 #include "FaceDescription.h"
+#include "FrameRegion.h"
 
 //Создаем интерфейс, который будет базовым для класса-обработчика видео
 class IFaceFinder {
@@ -37,8 +38,10 @@ public:
     virtual int faceCount() const = 0;
     //Ролучить лицо по конкретному ролику
     virtual FaceDescription* getFaceInfo(int index) const = 0;
-    //Получить все лица
-    virtual std::list<FaceDescription*> getFaceDescriptions() const = 0;
+    //Возьмем количество регионов, в которых встречается это лицо
+    virtual int frameRegionsNum(int index) const = 0;
+    //Получить регион, где встречается это лицо. Если регионов несколько, то по-умолчанию берется первый
+    virtual FrameRegion* getFaceRegionByIndex(int index, int frameNum = 0) const = 0;
 
 protected:
     //Чтобы конструктор нельзя было вызвать извне, помещаем его в зону protected

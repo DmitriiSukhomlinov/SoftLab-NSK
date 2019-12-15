@@ -16,16 +16,10 @@ struct FaceDescription {
             int width;
             int height;
         };
-        //Структура, где будет описано, на каком кадре мы встречаем лицо и сколько кадров этот фрагмент видео длится
-        struct FragmentFrames {
-            int start;
-            int duration;
-        };
 
         //Поля структуры
         PictureWithFace bestPicture;
         //Поскольку одно лицо может встречаться сразу в нескольких не связанных друг с другом фрагментах, нужен лист
-        std::list<FragmentFrames> fragments;
         int faceTemplateSize;
     };
 
@@ -43,7 +37,7 @@ struct FaceDescription {
     //Здесь мы храним всю информацию - размер картинки, кадры, и, самое главное - размер Face Template'а
     FaceDescriptionHeader header;
     //Указатель на массив с данными темплейта, размер массива лежит в структуре выше
-    char* faceTemplate;
+    char faceTemplate[1];
 };
 
 
