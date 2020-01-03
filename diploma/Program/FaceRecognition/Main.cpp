@@ -1,5 +1,6 @@
 #include "FaceSDK/LuxandFaceSDK.h"
 #include "FaceFinder/IFaceFinder.h"
+#include "FaceFinder/FaceFinder.h"
 #include "Utils/Check.h"
 #include "Utils/Consts.h"
 
@@ -12,11 +13,10 @@ int main() {
 
     result = FSDK_Initialize(dllPath);
     CHECK_RETURN(result == FSDKE_OK, "Correct initialization of the dll", "Initialization error", 0);
-
-
-    /*
-    Для тестирования!!!
     
+    /*
+    Для тестирования!
+
     shared_ptr<HImage> image(new HImage);
     result = FSDK_LoadImageFromFile(image.get(), "F:\\pic.jpg");//!
     CHECK_RETURN_NO_OK_MESSAGE(result == FSDKE_OK, "Error in loading process", 0);
@@ -35,8 +35,11 @@ int main() {
         CHECK_CONTINUE(result == FSDKE_OK, "Cannot get face template, error code " << result);
 
         FaceDescription::FaceDescriptionHeader header(0, facePositionArray[i].xc, facePositionArray[i].yc, facePositionArray[i].w, 0, int(sizeof(*faceTemplate)));
-
+        FaceDescription* faceDescription = new FaceDescription(header, faceTemplate->ftemplate[0]);
+        FrameRegion* frame = new FrameRegion(1, 1);
+        FaceFinder::DescriptionData descriptionData(faceDescription, std::vector<FrameRegion*>() = { frame });
     }
+    
     */
 
 

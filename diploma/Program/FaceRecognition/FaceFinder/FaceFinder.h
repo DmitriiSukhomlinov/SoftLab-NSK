@@ -42,7 +42,7 @@ public:
     //Наш конструктор, который перегружает конструктор интерфейса
     FaceFinder();
 
-private:
+
 
 
     //Нам нужно хранить мапу, у которой ключом будет индекс, а значением пара, с первым значением FaceDescription, а вторым - лист FrameRegion'ов, где он содержится
@@ -67,9 +67,9 @@ private:
         std::vector<FrameRegion*> frameRegions;
     };
 
+private:
     //Мапа, содержащая набор индексов и всей остальной информации
-    std::map<int, DescriptionData> descriptions;
-
+    std::map<int, DescriptionData*> descriptions;
     static const std::map<ColorDepth, FSDK_IMAGEMODE> COLOR_DEPTH_CORRELATION;
     static const double SIMILARITY_THRESHOLD;
 };

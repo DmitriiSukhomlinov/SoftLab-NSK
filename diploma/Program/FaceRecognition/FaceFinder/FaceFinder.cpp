@@ -16,7 +16,7 @@ FaceFinder::FaceFinder() {
 
 FaceFinder::~FaceFinder() {
     for (auto& desc : descriptions) {
-        delete& desc;
+        delete desc.second;
     }
 }
 
@@ -50,13 +50,13 @@ void FaceFinder::addImage(const int frameNumber, void* inputVideoBuffer, const i
         //Проверим если уже есть в массиве
         for (auto& v : descriptions) {
             //Вот тут у меня возникает закономерный вопрос - какием образом мне здесь провернуть операцию присваивания, чтобы в FSDK_FaceTemplate поместить то, что у нас сохранено?
-            FSDK_FaceTemplate* temp = reinterpret_cast<FSDK_FaceTemplate*>(v.second.faceDescrition->faceTemplate);
+            FSDK_FaceTemplate* temp = reinterpret_cast<FSDK_FaceTemplate*>(v.second->faceDescrition->faceTemplate);
             float similarity = 0.0;
             result = FSDK_MatchFaces(faceTemplate, temp, &similarity);
             CHECK_CONTINUE_NO_MESSAGE((similarity >= SIMILARITY_THRESHOLD));
             
             bool newRegion = true;
-            for (FrameRegion* frame : v.second.frameRegions) {
+            for (FrameRegion* frame : v.second->frameRegions) {
                 CHECK_CONTINUE_NO_MESSAGE((frame->start + frame->duration == frameNumber));
 
                 frame->duration++;
@@ -76,7 +76,7 @@ void FaceFinder::addImage(const int frameNumber, void* inputVideoBuffer, const i
         FaceDescription::FaceDescriptionHeader header(0, facePositionArray[i].xc, facePositionArray[i].yc, facePositionArray[i].w, 0, (int)sizeof(*faceTemplate));
         FaceDescription* faceDescription = new FaceDescription(header, faceTemplate->ftemplate[0]);
         FrameRegion* frame = new FrameRegion(frameNumber, 1);
-        DescriptionData descriptionData(faceDescription, std::vector<FrameRegion*>() = { frame });
+        DescriptionData* descriptionData = new DescriptionData(faceDescription, std::vector<FrameRegion*>() = { frame });
 
         //Здесь мы вставляем ключ и значение
         //У меня немного не получилось разобраться, как работает мапа в c++ и как в нее вставить элемент
@@ -101,22 +101,22 @@ FaceDescription* FaceFinder::getFaceInfo(int index) const {
     CHECK((index < descriptions.size()), nullptr);
 
     std::cout << "Index № " << index << " for the \"getFaceInfo\" function was found.";
-    return descriptions.at(index).faceDescrition;
+    return descriptions.at(index)->faceDescrition;
 }
 
 int FaceFinder::frameRegionsNum(int index) const {
     CHECK((index < descriptions.size()), -1);
 
     std::cout << "Index № " << index << " for the \"frameRegionsNum\" function was found.";
-    return int(descriptions.at(index).frameRegions.size());
+    return int(descriptions.at(index)->frameRegions.size());
 }
 
 FrameRegion* FaceFinder::getFaceRegionByIndex(int index, int frameNum) const {
     CHECK((index < descriptions.size()), nullptr);
-    CHECK((0 <= frameNum) && (frameNum < descriptions.at(frameNum).frameRegions.size()), nullptr);
+    CHECK((0 <= frameNum) && (frameNum < descriptions.at(frameNum)->frameRegions.size()), nullptr);
 
     std::cout << "Index № " << index << " for the \"getFaceRegionByIndex\" function was found.";
-    return descriptions.at(frameNum).frameRegions.at(frameNum);
+    return descriptions.at(frameNum)->frameRegions.at(frameNum);
 }
 
 /*************************************/
@@ -124,11 +124,11 @@ FrameRegion* FaceFinder::getFaceRegionByIndex(int index, int frameNum) const {
 /*************************************/
 
 FaceFinder::DescriptionData::DescriptionData(FaceDescription* _faceDescrition, const std::vector<FrameRegion*>& _frameRegions) 
-    : faceDescrition(faceDescrition), frameRegions(_frameRegions) {}
+    : faceDescrition(_faceDescrition), frameRegions(_frameRegions) {}
 
 FaceFinder::DescriptionData::~DescriptionData() {
     delete faceDescrition;
-    for (auto& regions : frameRegions) {
-        delete regions;
+    for (auto& region : frameRegions) {
+        delete region;
     }
 }
