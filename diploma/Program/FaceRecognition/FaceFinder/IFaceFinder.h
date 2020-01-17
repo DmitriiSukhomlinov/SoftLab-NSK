@@ -39,11 +39,11 @@ public:
     // оличество лиц, найденных в ходе обработки
     virtual int faceCount() const = 0;
     //–олучить лицо по конкретному ролику
-    virtual FaceDescription* getFaceInfo(int index) const = 0;
+    virtual FaceDescription* getFaceInfo(int iFaceIndex) const = 0;
     //¬озьмем количество регионов, в которых встречаетс€ это лицо
-    virtual int frameRegionsNum(int index) const = 0;
+    virtual int frameRegionsNum(int iFaceIndex) const = 0;
     //ѕолучить регион, где встречаетс€ это лицо. ≈сли регионов несколько, то по-умолчанию беретс€ первый
-    virtual FrameRegion* getFaceRegionByIndex(int index, int frameNum = 0) const = 0;
+    virtual FrameRegion* getFaceRegionByIndex(int iFaceIndex, int iRegionIndex = 0) const = 0;
 
 //protected:
     //„тобы конструктор нельз€ было вызвать извне, помещаем его в зону protected

@@ -69,7 +69,7 @@ public:
 
 private:
     //Мапа, содержащая набор индексов и всей остальной информации
-    std::map<int, DescriptionData*> descriptions;
+    std::vector<DescriptionData*> descriptions;
     static const std::map<ColorDepth, FSDK_IMAGEMODE> COLOR_DEPTH_CORRELATION;
     static const double SIMILARITY_THRESHOLD;
 };

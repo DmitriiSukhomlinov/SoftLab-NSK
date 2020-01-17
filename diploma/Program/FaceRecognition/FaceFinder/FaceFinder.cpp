@@ -22,6 +22,8 @@ FaceFinder::~FaceFinder() {
 
 void FaceFinder::init() {
     //Не совсем понимаю, что тут нужно инициализировать
+    descriptions.clear();
+    //Создать еще один класс FaceDescription с полями frameNumber, TFacePosition, FSDK_FaceTemplate
 }
 
 void FaceFinder::addImage(const int frameNumber, void* inputVideoBuffer, const int xPictureSize, const int yPictureSize, const int scanLine, const ColorDepth colorDepth) {
@@ -50,30 +52,34 @@ void FaceFinder::addImage(const int frameNumber, void* inputVideoBuffer, const i
         //Проверим если уже есть в массиве
         for (auto& v : descriptions) {
             //Вот тут у меня возникает закономерный вопрос - какием образом мне здесь провернуть операцию присваивания, чтобы в FSDK_FaceTemplate поместить то, что у нас сохранено?
-            FSDK_FaceTemplate* temp = reinterpret_cast<FSDK_FaceTemplate*>(v.second->faceDescrition->faceTemplate);
+            FSDK_FaceTemplate* temp = reinterpret_cast<FSDK_FaceTemplate*>(v->faceDescrition->faceTemplate);
             float similarity = 0.0;
             result = FSDK_MatchFaces(faceTemplate, temp, &similarity);
             CHECK_CONTINUE_NO_MESSAGE((similarity >= SIMILARITY_THRESHOLD));
-            
-            bool newRegion = true;
-            for (FrameRegion* frame : v.second->frameRegions) {
+
+            // то же лицо
+            for (FrameRegion* frame : v->frameRegions) {
                 CHECK_CONTINUE_NO_MESSAGE((frame->start + frame->duration == frameNumber));
-
                 frame->duration++;
-                newRegion = false;
-                break;
-            }
-
-            if (newRegion) {
-                FrameRegion* newFrame = new FrameRegion(frameNumber);
-                //Проблема как и ниже - не совсем понимаю, как работает функция insert в стандартной библиотеке вектора. Подскажите, пожалуйста)
-                //v.second.frameRegions.insert(newFrame);
+                ???
                 return;
             }
+
+            FrameRegion* newFrame = new FrameRegion(frameNumber);
+            //Проблема как и ниже - не совсем понимаю, как работает функция insert в стандартной библиотеке вектора. Подскажите, пожалуйста)
+            v->frameRegions.push_back(newFrame);
+
+            // выбрать лучшее лицо
+            if (? ? ) {
+                CopyMemory(v->faceDescrition->faceTemplate, faceTemplate, sizeof(FSDK_FaceTemplate));
+                v->faceDescrition->frameNumber = frameNumber;
+                ??
+            }
+            return;
         }
 
 
-        FaceDescription::FaceDescriptionHeader header(0, facePositionArray[i].xc, facePositionArray[i].yc, facePositionArray[i].w, 0, (int)sizeof(*faceTemplate));
+        FaceDescription::FaceDescriptionHeader header(frameNumber, facePositionArray[i].xc, facePositionArray[i].yc, facePositionArray[i].w, 0, (int)sizeof(*faceTemplate));
         FaceDescription* faceDescription = new FaceDescription(header, faceTemplate->ftemplate[0]);
         FrameRegion* frame = new FrameRegion(frameNumber, 1);
         DescriptionData* descriptionData = new DescriptionData(faceDescription, std::vector<FrameRegion*>() = { frame });
@@ -82,7 +88,7 @@ void FaceFinder::addImage(const int frameNumber, void* inputVideoBuffer, const i
         //У меня немного не получилось разобраться, как работает мапа в c++ и как в нее вставить элемент
         //Дело в том, что я очень долго работал с Qt и там все немного по-другому.
         //Надеюсь, что вы мне подскажете или посоветуете, как по-дрегому организовать данные.
-        //descriptions.insert(0, descriptionData);
+        descriptions.push_back(descriptionData);
     }
 }
 
@@ -91,6 +97,10 @@ void FaceFinder::finish() {
     //Хотя, насчет завершения, я полагаю, что в этот момент мы будем писать то, что было наработано в базу
     //Правда, я пока что не до конца представляю, как именно это будет делаться
     //Хотя, если правильно помню, нужно переорганизовать массив
+
+    //сравнение с другим порогом (грубее)
+
+    //скопировать из frameNumber, TFacePosition, FSDK_FaceTemplate в DescriptionData*
 }
 
 int FaceFinder::faceCount() const {
