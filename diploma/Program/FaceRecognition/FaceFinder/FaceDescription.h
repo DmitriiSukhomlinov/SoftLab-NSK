@@ -4,6 +4,7 @@
 #define _FACE_DESCRIPTION_
 
 #include <list>
+#include <windows.h>
 
 //Наше описание лица. 
 struct FaceDescriptionHeader {
@@ -27,12 +28,29 @@ struct FaceDescription {
     FaceDescriptionHeader header;
     //Указатель на массив с данными темплейта, размер массива лежит в структуре выше
     char faceTemplate[1];
+
+
 };
 
 // create face description
-//FaceDescription *CreateFaceDescription(int internal_data_size) {
-//    return (FaceDescription*)new BYTE[sizeof(FaceDescriptionHeader) + internal_data_size];
-//}
+static FaceDescription* createFaceDescription(int internal_data_size) {
+    return (FaceDescription*)new BYTE[sizeof(FaceDescriptionHeader) + internal_data_size];
+}
+
+static void fillFaceDescription(FaceDescription* faceDescription, 
+                                const int _frameNumber, 
+                                const int _x, 
+                                const int _y, 
+                                const int _width, 
+                                const int _height, 
+                                const int _faceTemplateSize) {
+    faceDescription->header.frameNumber = _frameNumber;
+    faceDescription->header.x = _x;
+    faceDescription->header.y = _y;
+    faceDescription->header.width = _width;
+    faceDescription->header.height = _height;
+    faceDescription->header.faceTemplateSize = _faceTemplateSize;
+}
 
 
 #endif // !_FACE_DESCRIPTION_

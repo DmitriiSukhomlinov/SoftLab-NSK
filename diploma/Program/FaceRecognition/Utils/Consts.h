@@ -1,6 +1,6 @@
 #pragma once
 
-static const char* key = "qPE+2Rmfqwr94Jv6sl/tYRDCpSKlJh4zPQls8hII6iNFPfqbbyJvQK454lWD+8fbunUFYkFM5RgnL9BhyJFOUTIZDtymJAovTTRd33bXExQrEdpxqaCAtd1K6+9ytu8NplntD+BlbgZkLciB4z/50JIID72nNmZxnBg/NxAoHeg=";
+static const char* key = "RymX9UbV75nb/1dOsFppHvgHL+77pHfjeb0GShSqxn3yjlca3d0uvSpS80boEnyC9XwMWCaYEdh9zNySHzMnq8ig11xQe71AGWrlTQy/nE69EjMr8xiAFhuLUF+8lyhayzxTGFgr8npnDT7wU9N6rdMvHWIS0dWe6qz9mf7BY6s=";
 
 //The path to the facesdk.dll
 //Null pointer means the current directory

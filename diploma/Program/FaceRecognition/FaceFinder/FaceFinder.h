@@ -68,6 +68,8 @@ public:
     };
 
 private:
+    bool isNewFaceBetter() const;
+
     //Мапа, содержащая набор индексов и всей остальной информации
     std::vector<DescriptionData*> descriptions;
     static const std::map<ColorDepth, FSDK_IMAGEMODE> COLOR_DEPTH_CORRELATION;

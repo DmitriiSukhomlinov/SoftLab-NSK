@@ -16,7 +16,7 @@ FaceFinder::FaceFinder() {
 
 FaceFinder::~FaceFinder() {
     for (auto& desc : descriptions) {
-        delete desc.second;
+        delete desc;
     }
 }
 
@@ -26,7 +26,7 @@ void FaceFinder::init() {
     //Создать еще один класс FaceDescription с полями frameNumber, TFacePosition, FSDK_FaceTemplate
 }
 
-void FaceFinder::addImage(const int frameNumber, void* inputVideoBuffer, const int xPictureSize, const int yPictureSize, const int scanLine, const ColorDepth colorDepth) {
+void FaceFinder::addImage(const int _frameNumber, void* inputVideoBuffer, const int xPictureSize, const int yPictureSize, const int scanLine, const ColorDepth colorDepth) {
     shared_ptr<HImage> image(new HImage);
     bool result = FSDK_LoadImageFromBuffer(image.get(), static_cast<unsigned char*>(inputVideoBuffer), xPictureSize, yPictureSize, scanLine, COLOR_DEPTH_CORRELATION.at(colorDepth));//!
     CHECK_RETURN_NO_OK_MESSAGE(result == FSDKE_OK, "Error in the loading process, error code " << result, );
@@ -58,30 +58,27 @@ void FaceFinder::addImage(const int frameNumber, void* inputVideoBuffer, const i
             CHECK_CONTINUE_NO_MESSAGE((similarity >= SIMILARITY_THRESHOLD));
 
             // то же лицо
+
             for (FrameRegion* frame : v->frameRegions) {
-                CHECK_CONTINUE_NO_MESSAGE((frame->start + frame->duration == frameNumber));
+                CHECK_CONTINUE_NO_MESSAGE((frame->start + frame->duration == _frameNumber));
                 frame->duration++;
-                ???
-                return;
             }
 
-            FrameRegion* newFrame = new FrameRegion(frameNumber);
-            //Проблема как и ниже - не совсем понимаю, как работает функция insert в стандартной библиотеке вектора. Подскажите, пожалуйста)
+            FrameRegion* newFrame = new FrameRegion(_frameNumber);
             v->frameRegions.push_back(newFrame);
 
             // выбрать лучшее лицо
-            if (? ? ) {
+            if (isNewFaceBetter()) {
+                fillFaceDescription(v->faceDescrition, _frameNumber, facePositionArray[i].xc, facePositionArray[i].yc, facePositionArray[i].w, 0, (int)sizeof(*faceTemplate));
                 CopyMemory(v->faceDescrition->faceTemplate, faceTemplate, sizeof(FSDK_FaceTemplate));
-                v->faceDescrition->frameNumber = frameNumber;
-                ??
             }
             return;
         }
-
-
-        FaceDescription::FaceDescriptionHeader header(frameNumber, facePositionArray[i].xc, facePositionArray[i].yc, facePositionArray[i].w, 0, (int)sizeof(*faceTemplate));
-        FaceDescription* faceDescription = new FaceDescription(header, faceTemplate->ftemplate[0]);
-        FrameRegion* frame = new FrameRegion(frameNumber, 1);
+        //sizeof чего здесь правильнее использовать?
+        FaceDescription* faceDescription = createFaceDescription((int)sizeof(FSDK_FaceTemplate));
+        fillFaceDescription(faceDescription, _frameNumber, facePositionArray[i].xc, facePositionArray[i].yc, facePositionArray[i].w, 0, (int)sizeof(*faceTemplate));
+        CopyMemory(faceDescription->faceTemplate, faceTemplate, sizeof(FSDK_FaceTemplate));
+        FrameRegion* frame = new FrameRegion(_frameNumber);
         DescriptionData* descriptionData = new DescriptionData(faceDescription, std::vector<FrameRegion*>() = { frame });
 
         //Здесь мы вставляем ключ и значение
@@ -127,6 +124,11 @@ FrameRegion* FaceFinder::getFaceRegionByIndex(int index, int frameNum) const {
 
     std::cout << "Index № " << index << " for the \"getFaceRegionByIndex\" function was found.";
     return descriptions.at(frameNum)->frameRegions.at(frameNum);
+}
+
+bool FaceFinder::isNewFaceBetter() const {
+
+    return true;
 }
 
 /*************************************/
