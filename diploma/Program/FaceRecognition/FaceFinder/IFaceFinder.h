@@ -3,6 +3,7 @@
 #include "FaceDescription.h"
 #include "FrameRegion.h"
 
+#include <string>
 //Создаем интерфейс, который будет базовым для класса-обработчика видео
 class IFaceFinder {
 public:
@@ -31,7 +32,8 @@ public:
     virtual void init() = 0;
     //Добавляем картинку - буфер данных, размер, scanLine и глубину цвета
     //Эта функция должна вызываться в цикле
-    virtual void addImage(const int frameNumber, void* _inputVideoBuffer, const int _xPictureSize, const int _yPictureSize, const int _scanLine, const ColorDepth _colorDepth) = 0;
+    //virtual void addImage(const int frameNumber, void* _inputVideoBuffer, const int _xPictureSize, const int _yPictureSize, const int _scanLine, const ColorDepth _colorDepth) = 0;
+    virtual void addImage(const int frameNumber, const std::string& path) = 0;
     //Заканчиваем обработку данных
     virtual void finish() = 0;
 

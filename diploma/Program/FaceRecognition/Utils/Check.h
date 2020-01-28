@@ -3,12 +3,12 @@
 #include <iostream>
 using namespace std;
 
-#define CHECK(condition, result) \
+#define CHECK_IF_FALSE(condition, result) \
     if (!condition) { \
         return result; \
     } \
 
-#define CHECK_RETURN(condition, messageOk, messageError, result) \
+#define CHECK_IF_FALSE_RETURN(condition, messageOk, messageError, result) \
     if (condition) { \
         cout << messageOk << endl; \
     } else { \
@@ -17,13 +17,13 @@ using namespace std;
         return result; \
     } \
 
-#define CHECK_RETURN_NO_OK_MESSAGE(condition, messageError, result) \
+#define CHECK_IF_FALSE_RETURN_NO_OK_MESSAGE(condition, messageError, result) \
     if (!condition) { \
         cout << messageError << endl; \
         return result; \
     } \
 
-#define CHECK_PAUSE(condition, messageOk, messageError) \
+#define CHECK_IF_FALSE_PAUSE(condition, messageOk, messageError) \
     if (condition) { \
         cout << messageOk << endl; \
     } else { \
@@ -31,19 +31,19 @@ using namespace std;
         system("pause"); \
     } \
 
-#define CHECK_CONTINUE(condition, messageError) \
+#define CHECK_IF_FALSE_CONTINUE(condition, messageError) \
     if (!condition) { \
         cout << messageError << endl; \
         continue; \
     } \
 
-#define CHECK_CONTINUE_NO_MESSAGE(condition) \
+#define CHECK_IF_FALSE_CONTINUE_NO_MESSAGE(condition) \
     if (!condition) { \
         continue; \
     } \
 
 
-#define CHECK_BREAK(condition) \
+#define CHECK_IF_FALSE_BREAK(condition) \
     if (!condition) { \
         break; \
     } \

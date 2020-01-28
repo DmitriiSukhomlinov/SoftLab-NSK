@@ -24,7 +24,8 @@ public:
     //Функция, стартующая цикл, в котором будут обрабатываться картинка одна за одной
     void init() override;
     //Доавляем картинку на обработку в цикле
-    void addImage(const int frameNumber, void* _inputVideoBuffer, const int _xPictureSize, const int _yPictureSize, const int _scanLine, const ColorDepth _colorDepth) override;
+    //void addImage(const int frameNumber, void* _inputVideoBuffer, const int _xPictureSize, const int _yPictureSize, const int _scanLine, const ColorDepth _colorDepth) override;
+    void addImage(const int frameNumber, const std::string& path) override;
     //Функция, завершающая обработку
     void finish() override;
 
@@ -50,6 +51,7 @@ public:
     //std::map<int, std::pair<FaceDescription*, std::list<FrameRegion*> > >
     //Получается ну очень большое нагромождение, что не есть хорошо
     //Поэтому, полагаю, что проще вынести все это добро в особую структуру
+private:
     struct DescriptionData {
         //Конструктор. Другие, полагаю, не нужны
         DescriptionData(FaceDescription* _faceDescrition, const std::vector<FrameRegion*>& _frameRegions);
@@ -67,11 +69,32 @@ public:
         std::vector<FrameRegion*> frameRegions;
     };
 
-private:
+    struct FaceDescriptionTemp {
+        FaceDescriptionTemp();
+        FaceDescriptionTemp(const int bestFrame, TFacePosition* facePosition, FSDK_FaceTemplate* faceTemplate);
+
+        FaceDescriptionTemp(const FaceDescriptionTemp& other) = delete;
+        FaceDescriptionTemp(FaceDescriptionTemp&& other) noexcept = delete;
+        ~FaceDescriptionTemp();
+        FaceDescriptionTemp& operator=(const FaceDescriptionTemp& other) = delete;
+        FaceDescriptionTemp& operator=(FaceDescriptionTemp&& other) noexcept = delete;
+
+        void clear();
+
+        int bestFrame;
+        std::vector<FrameRegion*> frameRegions;
+        TFacePosition* facePosition;
+        FSDK_FaceTemplate* faceTemplate;
+    };
+
     bool isNewFaceBetter() const;
 
-    //Мапа, содержащая набор индексов и всей остальной информации
+    //Конечная информация - заполняется при вызове finish
     std::vector<DescriptionData*> descriptions;
+
+    //С этим вектором идет работа во время добавления кадров
+    std::vector<FaceDescriptionTemp*> tempDescriptions;
+
     static const std::map<ColorDepth, FSDK_IMAGEMODE> COLOR_DEPTH_CORRELATION;
     static const double SIMILARITY_THRESHOLD;
 };
