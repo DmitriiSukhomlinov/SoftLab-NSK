@@ -39,7 +39,6 @@ public:
     //Получить регион, где встречается это лицо. Если регионов несколько, то по-умолчанию берется первый
     FrameRegion* getFaceRegionByIndex(int index, int frameNum = 0) const override;
 
-//protected:
     //Наш конструктор, который перегружает конструктор интерфейса
     FaceFinder();
 
@@ -88,15 +87,18 @@ private:
     };
 
     bool isNewFaceBetter() const;
+    void clearDescriptions();
+    void clearTempDescriptions();
+    void clearAll();
 
     //Конечная информация - заполняется при вызове finish
     std::vector<DescriptionData*> descriptions;
-
     //С этим вектором идет работа во время добавления кадров
     std::vector<FaceDescriptionTemp*> tempDescriptions;
 
     static const std::map<ColorDepth, FSDK_IMAGEMODE> COLOR_DEPTH_CORRELATION;
     static const double SIMILARITY_THRESHOLD;
+    static const int MAX_FACE_COUNT;
 };
 
 #endif // !_FACE_FINDER_

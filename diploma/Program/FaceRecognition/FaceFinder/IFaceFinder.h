@@ -47,7 +47,7 @@ public:
     //ѕолучить регион, где встречаетс€ это лицо. ≈сли регионов несколько, то по-умолчанию беретс€ первый
     virtual FrameRegion* getFaceRegionByIndex(int iFaceIndex, int iRegionIndex = 0) const = 0;
 
-//protected:
+protected:
     //„тобы конструктор нельз€ было вызвать извне, помещаем его в зону protected
     IFaceFinder() = default;
 

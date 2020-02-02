@@ -10,19 +10,17 @@ const std::map<IFaceFinder::ColorDepth, FSDK_IMAGEMODE> FaceFinder::COLOR_DEPTH_
                                                                                                  {ColorDepth::Bit24, FSDK_IMAGE_COLOR_24BIT}, 
                                                                                                  {ColorDepth::Bit32, FSDK_IMAGE_COLOR_32BIT} };
 const double FaceFinder::SIMILARITY_THRESHOLD = 0.75;
+const int FaceFinder::MAX_FACE_COUNT = 10;
 
 FaceFinder::FaceFinder() {
 }
 
 FaceFinder::~FaceFinder() {
-    for (auto& desc : descriptions) {
-        delete desc;
-    }
+    clearAll();
 }
 
 void FaceFinder::init() {
-    descriptions.clear();
-    tempDescriptions.clear();
+    clearAll();
 }
 
 //void FaceFinder::addImage(const int _frameNumber, void* inputVideoBuffer, const int xPictureSize, const int yPictureSize, const int scanLine, const ColorDepth colorDepth) {
@@ -33,14 +31,13 @@ void FaceFinder::addImage(const int _frameNumber, const std::string& path) {
     CHECK_IF_FALSE_RETURN_NO_OK_MESSAGE(result == FSDKE_OK, "Error in the loading process, error code " << result, );
 
     int facesCount = 0;
-    shared_ptr<TFacePosition> facePositionPointer(new TFacePosition);
+    shared_ptr<TFacePosition> facePositionPointer(new TFacePosition[MAX_FACE_COUNT]);
     //Есть вопрос выбора этого значения.
     //Если у нас изображение с глубиной цвета 24 бит и на нем есть два лица, то для того, чтобы они оба оказались определены, 
     //значение maxSizeInBytes нужно выставить на 24*2=48 как минимум. Если выставить от 24 до 48, то найдется только одно лицо. 
     //Если меньше 24 - то не найдет ни одного
     //Кстати, это можно обработать, потому что если он не вернет лиц из-за недостаточного значения, то код ошибки будет FSDKE_INSUFFICIENT_BUFFER_SIZE(-8)
-    const int maxSizeInBytes = 1024;
-    result = FSDK_DetectMultipleFaces(*image.get(), &facesCount, facePositionPointer.get(), maxSizeInBytes);
+    result = FSDK_DetectMultipleFaces(*image.get(), &facesCount, facePositionPointer.get(), sizeof(TFacePosition) * MAX_FACE_COUNT);
     CHECK_IF_FALSE_RETURN_NO_OK_MESSAGE(result == FSDKE_OK, "Error in the face detecting process, error code " << result, );
     CHECK_IF_FALSE(facesCount != 0, );
 
@@ -62,6 +59,7 @@ void FaceFinder::addImage(const int _frameNumber, const std::string& path) {
                 CHECK_IF_FALSE_CONTINUE_NO_MESSAGE((frame->start + frame->duration == _frameNumber));
                 frame->duration++;
                 addToExistRegion = true;
+                break;
             }
 
             if (!addToExistRegion) {
@@ -72,13 +70,13 @@ void FaceFinder::addImage(const int _frameNumber, const std::string& path) {
             // выбрать лучшее лицо
             if (isNewFaceBetter()) {
                 tmpDesc->bestFrame = _frameNumber;
-                tmpDesc->facePosition = &facePositionArray[i];//ПРОВЕРИТЬ!!!!
+                tmpDesc->facePosition = new TFacePosition (facePositionArray[i]);//ПРОВЕРИТЬ!!!!
                 tmpDesc->faceTemplate = faceTemplate;
             }
         }
 
         if (createNewFaceDesription) {
-            tempDescriptions.push_back(new FaceDescriptionTemp(_frameNumber, &facePositionArray[i], faceTemplate));
+            tempDescriptions.push_back(new FaceDescriptionTemp(_frameNumber, new TFacePosition(facePositionArray[i]), faceTemplate));
         }
 
         /*
@@ -122,10 +120,15 @@ void FaceFinder::finish() {
         FaceDescription* faceDescription = createFaceDescription((int)sizeof(FSDK_FaceTemplate));
         fillFaceDescription(faceDescription, tmpDesc->bestFrame, tmpDesc->facePosition->xc, tmpDesc->facePosition->yc, tmpDesc->facePosition->w, 0, (int)sizeof(*tmpDesc->faceTemplate));
         CopyMemory(faceDescription->faceTemplate, tmpDesc->faceTemplate, sizeof(FSDK_FaceTemplate));
-        DescriptionData* descriptionData = new DescriptionData(faceDescription, tmpDesc->frameRegions);
+        std::vector<FrameRegion*> descriptionFrameRegions;
+        for (auto& region : tmpDesc->frameRegions) {
+            descriptionFrameRegions.push_back(new FrameRegion(*region));
+        }
+        DescriptionData* descriptionData = new DescriptionData(faceDescription, descriptionFrameRegions);
 
         descriptions.push_back(descriptionData);
     }
+    clearTempDescriptions();
     //Что завершать тоже не очень понятно
     //Хотя, насчет завершения, я полагаю, что в этот момент мы будем писать то, что было наработано в базу
     //Правда, я пока что не до конца представляю, как именно это будет делаться
@@ -167,6 +170,25 @@ bool FaceFinder::isNewFaceBetter() const {
     return true;
 }
 
+void FaceFinder::clearDescriptions() {
+    for (auto& desc : descriptions) {
+        delete desc;
+    }
+    descriptions.clear();
+}
+
+void FaceFinder::clearTempDescriptions() {
+    for (auto& tmpDesc : tempDescriptions) {
+        delete tmpDesc;
+    }
+    tempDescriptions.clear();
+}
+
+void FaceFinder::clearAll() {
+    clearDescriptions();
+    clearTempDescriptions();
+}
+
 /*************************************/
 /************DescriptionData**********/
 /*************************************/
@@ -193,7 +215,11 @@ FaceFinder::FaceDescriptionTemp::FaceDescriptionTemp(const int _bestFrame, TFace
 }
 
 FaceFinder::FaceDescriptionTemp::~FaceDescriptionTemp() {
-
+    for (auto& region : frameRegions) {
+        delete region;
+    }
+    delete facePosition;
+    delete faceTemplate;
 }
 
 void FaceFinder::FaceDescriptionTemp::clear() {

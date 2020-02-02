@@ -47,6 +47,8 @@ int main() {
     }
     ff->finish();
 
+    delete ff;
+
     
     /*
     Для тестирования!
@@ -76,6 +78,6 @@ int main() {
     
     */
 
-
+    FSDK_Finalize();
     return 0;
 }

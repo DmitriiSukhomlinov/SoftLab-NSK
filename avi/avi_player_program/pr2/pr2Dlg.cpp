@@ -192,7 +192,7 @@ bool Cpr2Dlg::OpenAVI (CString pathToFile)
     if (hres != S_OK)
     {
         PostMessage(WM_USER + 2, Critical_Error_CoCreateInstance_For_Decode, 0);
-        AfxMessageBox("Error: can't create CoCreateInstance object for decode");
+        AfxMessageBox(L"Error: can't create CoCreateInstance object for decode");
         return false;
     }
 
@@ -317,7 +317,7 @@ void Cpr2Dlg::LoopRead()
             return;
         case Critical_Error_Can_Not_Read:
             PostMessage(WM_USER + 1, Critical_Error_Can_Not_Read, 0);
-            AfxMessageBox("Error: can't set a pointer to the frame");
+            AfxMessageBox(L"Error: can't set a pointer to the frame");
             return;
         }
     }
@@ -524,8 +524,8 @@ bool Cpr2Dlg::TryNextFrame()
     m_FifoDecToDraw.AddFree();
     m_Progr.SetPos(m_nFrameNum);
     //show a number of a frame, which was drawn
-    char cNumInChar[10];
-    sprintf(cNumInChar, "%d", m_nFrameNum);
+    WCHAR cNumInChar[10];
+    wsprintf(cNumInChar, L"%d", m_nFrameNum);
     SetDlgItemText(IDC_NUM, cNumInChar);
     //update counts
     m_nFramesAfterPushPlay++;

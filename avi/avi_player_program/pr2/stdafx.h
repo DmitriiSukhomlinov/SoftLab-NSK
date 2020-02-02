@@ -46,7 +46,7 @@
 #else 
 #import "libid:568DF441-DEAC-11D3-BBEE-0000B4908D28" named_guids raw_interfaces_only
 #endif
-using namespace GETAVIINFOLib;
+//using namespace GETAVIINFOLib;
 
 
 
@@ -56,7 +56,7 @@ using namespace GETAVIINFOLib;
 #else 
 #import "libid:B6D80AF6-B6D4-411A-BFD6-77C1613F511F" named_guids raw_interfaces_only
 #endif
-using namespace ICONVERTIMAGELib;
+//using namespace ICONVERTIMAGELib;
 
 
 
