@@ -1,3 +1,5 @@
+
+
 #include "FaceSDK/LuxandFaceSDK.h"
 #include "FaceFinder/IFaceFinder.h"
 #include "FaceFinder/FaceFinder.h"
@@ -6,32 +8,48 @@
 
 #include <iostream>
 
-//unsigned char* readBmp(const std::string& path) {
-//    FILE* bmp = fopen(path.c_str(), "rb");//Открываем файл для чтения побитово
-//    BITMAPFILEHEADER bmpHeader;//Промежуточные значения, нужны на случай,
-//    BITMAPINFOHEADER bmpInfo;  //если будет попытка открыть файл не того формата,
-//                                           //чтобы не потерялись данные о заголовках
-//    fread(&bmpHeader, 1, sizeof(BITMAPFILEHEADER), bmp);//Считываем FILEHEADER
-//    fread(&bmpInfo, 1, sizeof(BITMAPINFOHEADER), bmp);//Считываем INFOHEADER
-//    try//Обработка исключения
-//    {
-//        if ((bmpHeader.bfType != 0x4D42) || (bmpInfo.biBitCount != 24))//Проверка сигнатуры и глубины цвета
-//        {
-//            throw "Файл должен быть 24-х битным .bmp";
-//        }
-//    } catch (const char* exeption)//Если файл не того формата - выкидываем исключение...
-//    {
-//        return nullptr;
-//    }
-//    unsigned char* data = new unsigned char[bmpInfo.biHeight * bmpInfo.biWidth * 3];//Создаем массив для данных о растре
-//    fseek(bmp, bmpHeader.bfOffBits, SEEK_SET);//Перемещаем указатель в потоке на то место, где начинается инфа оо RGB (Ну так, на всякий случай)
-//    fread(data, 1, bmpInfo.biHeight * bmpInfo.biWidth * 3, bmp);//Данные прочитаны
-//    fclose(bmp);//Закрываем файл, больше он нам ни к чему
-//    return data;
-//}
+
+
+unsigned char* readBmp(const std::string& path, BITMAPINFOHEADER& bmpInfo) {
+    FILE* bmp = fopen(path.c_str(), "rb");//Открываем файл для чтения побитово, НАДО УБРАТЬ ВОРНИНГ!!!
+
+    BITMAPFILEHEADER bmpHeader;
+    fread(&bmpHeader, 1, sizeof(BITMAPFILEHEADER), bmp);//Считываем FILEHEADER
+    fread(&bmpInfo, 1, sizeof(BITMAPINFOHEADER), bmp);//Считываем INFOHEADER
+    try//Обработка исключения
+    {
+        if ((bmpHeader.bfType != 0x4D42) || (bmpInfo.biBitCount != 24))//Проверка сигнатуры и глубины цвета
+        {
+            throw "Файл должен быть 24-х битным .bmp";
+        }
+    } catch (const char* )//Если файл не того формата - выкидываем исключение...
+    {
+        return nullptr;
+    }
+    //const long int dataSize = long int(bmpInfo.biHeight) * bmpInfo.biWidth * 3;
+    //const int scanLine = ((bmpInfo.biWidth * 32 + 31) & ~31) / 8 * 3;
+    const int additionalPixelsTwo = (bmpInfo.biWidth * 3) % 4 == 0 ? 0 : 4 - (bmpInfo.biWidth * 3) % 4;
+    const int scanLine = (bmpInfo.biWidth * 3) + additionalPixelsTwo;
+    const long int dataSize = long int(bmpInfo.biHeight) * scanLine;
+    unsigned char* data = new unsigned char[dataSize];//Создаем массив для данных о растре
+    fseek(bmp, bmpHeader.bfOffBits, SEEK_SET);//Перемещаем указатель в потоке на то место, где начинается инфа оо RGB (Ну так, на всякий случай)
+    fread(data, 1, dataSize, bmp);//Данные прочитаны
+    fclose(bmp);//Закрываем файл, больше он нам ни к чему
+
+
+    //for (int i = 0; i < bmpInfo.biHeight; i++) {
+    //    for (int j = 0; j < bmpInfo.biWidth / 2; j++) {
+    //        swap(data[i * bmpInfo.biWidth + j], data[i * bmpInfo.biWidth + bmpInfo.biWidth - 1 - j]);
+    //    }
+    //}
+
+    //for (int i = 0; i < int(dataSize / 2); i++) {
+    //    swap(data[i], data[(dataSize - 1) - i]);
+    //}
+    return data;
+}
 
 int main() {
-
     int result = FSDK_ActivateLibrary(key);
     CHECK_IF_FALSE_RETURN(result == FSDKE_OK, "Correct key", "Activation error", 0);
 
@@ -40,10 +58,17 @@ int main() {
 
     IFaceFinder* ff = FaceFinder::createFaceFinder();
     ff->init();
-    for (int i = 1; i < 3; i++) {
-        std::string path = "F:/pic" + std::to_string(i) + ".jpg";
-        //unsigned char* res = readBmp(path);
-        ff->addImage(i, path);
+    for (int i = 0; i < 7; i++) {
+        std::string path = "F:/pic" + std::to_string(i) + ".bmp";
+        BITMAPINFOHEADER bmpInfo;
+        unsigned char* res = readBmp(path, bmpInfo);
+        //Количество добавленных пикселей (в .bmp-шках добавляются в каждую строчку столько пикселей, чтобы их количество было кратно четырем)
+        const int additionalPixelsTwo = (bmpInfo.biWidth * 3) % 4 == 0 ? 0 : 4 - (bmpInfo.biWidth * 3) % 4;
+        const int scanLine = (bmpInfo.biWidth  * 3 ) + additionalPixelsTwo;
+        //const int scanLine = ((bmpInfo.biWidth * 32 + 31) & ~31) / 8 * 3;
+
+        ff->addImage(i, res, bmpInfo.biWidth, bmpInfo.biHeight, scanLine, IFaceFinder::ColorDepth::Bit24);
+        delete[]res;
     }
     ff->finish();
 
@@ -78,6 +103,8 @@ int main() {
     
     */
 
-    FSDK_Finalize();
+    result = FSDK_Finalize();
+    CHECK_IF_FALSE_RETURN(result == FSDKE_OK, "Correct finalazing of the dll", "Incorect finalazing... Well... Ok))", 0);
+
     return 0;
 }

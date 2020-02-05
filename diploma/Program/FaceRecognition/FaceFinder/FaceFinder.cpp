@@ -23,15 +23,18 @@ void FaceFinder::init() {
     clearAll();
 }
 
-//void FaceFinder::addImage(const int _frameNumber, void* inputVideoBuffer, const int xPictureSize, const int yPictureSize, const int scanLine, const ColorDepth colorDepth) {
-void FaceFinder::addImage(const int _frameNumber, const std::string& path) {
+void FaceFinder::addImage(const int _frameNumber, void* inputVideoBuffer, const int xPictureSize, const int yPictureSize, const int scanLine, const ColorDepth colorDepth) {
+//void FaceFinder::addImage(const int _frameNumber, const std::string& path) {
     shared_ptr<HImage> image(new HImage);
-    //bool result = FSDK_LoadImageFromBuffer(image.get(), static_cast<unsigned char*>(inputVideoBuffer), xPictureSize, yPictureSize, scanLine, COLOR_DEPTH_CORRELATION.at(colorDepth));//!
-    int result = FSDK_LoadImageFromFile(image.get(), path.c_str());//!
+    unsigned char* data = static_cast<unsigned char*>(inputVideoBuffer);
+    FSDK_IMAGEMODE mode = COLOR_DEPTH_CORRELATION.at(colorDepth);
+    int result = FSDK_LoadImageFromBuffer(image.get(), data, xPictureSize, yPictureSize, scanLine, mode);//!
+    //int result = FSDK_LoadImageFromFile(image.get(), path.c_str());//!
     CHECK_IF_FALSE_RETURN_NO_OK_MESSAGE(result == FSDKE_OK, "Error in the loading process, error code " << result, );
 
     int facesCount = 0;
     shared_ptr<TFacePosition> facePositionPointer(new TFacePosition[MAX_FACE_COUNT]);
+    result = FSDK_SaveImageToFile(*image.get(), "F:/new.pick");
     //Есть вопрос выбора этого значения.
     //Если у нас изображение с глубиной цвета 24 бит и на нем есть два лица, то для того, чтобы они оба оказались определены, 
     //значение maxSizeInBytes нужно выставить на 24*2=48 как минимум. Если выставить от 24 до 48, то найдется только одно лицо. 
