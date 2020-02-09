@@ -96,11 +96,12 @@
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <AdditionalLibraryDirectories>F:\softlab-nsk\diploma\Program\FaceRecognition\FaceSDK;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)\GetAVIInfo;$(ProjectDir)\FaceSDK;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>facesdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(SolutionDir)\FaceSDK\facesdk.dll $(OutDir)\</Command>
+      <Command>copy $(SolutionDir)\FaceSDK\facesdk.dll $(OutDir)\
+copy $(SolutionDir)\GetAVIInfo\GetAVIInfo.dll $(OutDir)\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -139,12 +140,14 @@
     <ClInclude Include="FaceFinder\FrameRegion.h" />
     <ClInclude Include="FaceFinder\IFaceFinder.h" />
     <ClInclude Include="FaceSDK\LuxandFaceSDK.h" />
+    <ClInclude Include="Loaders\AviLoader.h" />
     <ClInclude Include="Utils\Check.h" />
     <ClInclude Include="Utils\Consts.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FaceFinder\FaceFinder.cpp" />
     <ClCompile Include="FaceFinder\IFaceFinder.cpp" />
+    <ClCompile Include="Loaders\AviLoader.cpp" />
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
