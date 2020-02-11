@@ -9,7 +9,7 @@
 #include "FaceDescription.h"
 #include "IFaceFinder.h"
 
-#include "..\FaceSDK\LuxandFaceSDK.h"
+#include "../FaceSDK/LuxandFaceSDK.h"
 
 class FaceFinder : public IFaceFinder {
 public:

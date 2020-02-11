@@ -1,5 +1,6 @@
 #include "AviLoader.h"
 #include "../Utils/Check.h"
+#include "../GetAVIInfo/GetAVIInfo.h"
 
 AviLoader::AviLoader() : avi(nullptr), totalFrames(0), /*decodedImage(nullptr),*/ decodedImageSize(0), bmpInfoIn(nullptr), scanLine(0), frameNum(0) {}
 
@@ -17,7 +18,9 @@ void AviLoader::loadFile(const std::string& path) {
 
     CComBSTR MyBstr(path.c_str());//convert the format from char to BSTR
     hres = avi->Load(MyBstr);//read AVI file
-    CHECK_IF_FALSE_RETURN(hres == S_OK, "AVI file was loaded correctly.", "AVI file loading error.", );
+    
+    std::string str = std::system_category().message(hres);
+    CHECK_IF_FALSE_RETURN(hres == S_OK, "AVI file was loaded correctly.", _com_error(hres).ErrorMessage(), );
 
     MainAVIHeader aviHeader;
     long tmp = 0;
@@ -47,11 +50,10 @@ void AviLoader::loadFile(const std::string& path) {
     const int additionalPixelsTwo = (bmpInfoIn->bmiHeader.biWidth * 3) % 4 == 0 ? 0 : 4 - (bmpInfoIn->bmiHeader.biWidth * 3) % 4;
     scanLine = (bmpInfoIn->bmiHeader.biWidth * 3) + additionalPixelsTwo;
     decodedImageSize = bmpInfoIn->bmiHeader.biHeight * scanLine;
-    //decodedImage = new unsigned char[bmpInfoIn->bmiHeader.biHeight * scanLine];
 
-    //hic = ICOpen(ICTYPE_VIDEO, streamHeader.fccHandler, ICMODE_DECOMPRESS); //open file for decompression
+    hic = ICOpen(ICTYPE_VIDEO, streamHeader.fccHandler, ICMODE_DECOMPRESS); //open file for decompression
     if (hic == 0) { //if it didn't work...
-        //hic = ICLocate(ICTYPE_VIDEO, streamHeader.fccHandler, &bmpInfoIn->bmiHeader, &bmpInfoOut.bmiHeader, ICMODE_DECOMPRESS);//...try to find a codec automatically
+        hic = ICLocate(ICTYPE_VIDEO, streamHeader.fccHandler, &bmpInfoIn->bmiHeader, &bmpInfoOut.bmiHeader, ICMODE_DECOMPRESS);//...try to find a codec automatically
     }
     CHECK_IF_FALSE_RETURN(hres == S_OK, "The codec was initialized correctly.", "Can not initialize the codec.", );
 

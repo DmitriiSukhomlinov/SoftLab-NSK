@@ -1,8 +1,11 @@
+#define _CRT_SECURE_NO_WARNINGS
+
 #include "atlcomcli.h"
 
 #include "FaceSDK/LuxandFaceSDK.h"
 #include "FaceFinder/IFaceFinder.h"
-#include "FaceFinder/FaceFinder.h"
+//#include "FaceFinder/FaceFinder.h"
+#include "Loaders/IAviLoader.h"
 #include "Loaders/AviLoader.h"
 #include "Utils/Check.h"
 #include "Utils/Consts.h"
@@ -10,7 +13,6 @@
 #include <iostream>
 
 unsigned char* readBmp(const std::string& path, BITMAPINFOHEADER& bmpInfo) {
-
     FILE* bmp = fopen(path.c_str(), "rb");//Открываем файл для чтения побитово, НАДО УБРАТЬ ВОРНИНГ!!!
 
     BITMAPFILEHEADER bmpHeader;
@@ -50,8 +52,9 @@ unsigned char* readBmp(const std::string& path, BITMAPINFOHEADER& bmpInfo) {
 }
 
 int main() {
+    //IAviLoader* aviLoader = IAviLoader::createAviLoader();
+    IAviLoader* aviLoader = new AviLoader;
 
-    AviLoader* aviLoader = new AviLoader;
     aviLoader->init();
     aviLoader->loadFile("");
 
@@ -61,7 +64,7 @@ int main() {
     result = FSDK_Initialize(dllPath);
     CHECK_IF_FALSE_RETURN(result == FSDKE_OK, "Correct initialization of the dll", "Initialization error", 0);
 
-    IFaceFinder* ff = FaceFinder::createFaceFinder();
+    IFaceFinder* ff = IFaceFinder::createFaceFinder();
     ff->init();
     for (int i = 0; i < 7; i++) {
         std::string path = "F:/pic" + std::to_string(i) + ".bmp";

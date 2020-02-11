@@ -1,6 +1,8 @@
 #ifndef _AVI_LOADER_
 #define _AVI_LOADER_
 
+#include "IAviLoader.h"
+
 #include "atlcomcli.h"
 #include "Vfw.h"
 
@@ -12,7 +14,7 @@
 
 #include <string>
 
-class AviLoader {
+class AviLoader : public IAviLoader {
 public:
     AviLoader();
 
@@ -22,12 +24,10 @@ public:
     AviLoader& operator=(const AviLoader& other) = delete;
     AviLoader& operator=(AviLoader&& other) noexcept = delete;
 
-    void init();
-    void loadFile(const std::string& path);
-    unsigned char* readNextFrame();
-    void finish();
-
-
+    void init() override;
+    void loadFile(const std::string& path) override;
+    unsigned char* readNextFrame() override;
+    void finish() override;
 
 private:
     CComPtr <struct GETAVIINFOLib::IGetAVIInfo> avi;
@@ -41,9 +41,6 @@ private:
     HIC hic;//codec
     HANDLE myAvi;
     int frameNum;
-
-
-
 
 };
 

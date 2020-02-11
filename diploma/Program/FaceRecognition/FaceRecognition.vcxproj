@@ -70,8 +70,12 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>$(SolutionDir)\$(Configuration)\</OutDir>
-    <IntDir>$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)\_debug_x64\</OutDir>
+    <IntDir>_debug_x64\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(SolutionDir)\_debug_x32\</OutDir>
+    <IntDir>_debug_x32\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -79,12 +83,21 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)\GetAVIInfo\x86;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OmitFramePointers />
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <AdditionalLibraryDirectories>F:\softlab-nsk\diploma\Program\FaceRecognition\FaceSDK;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>facesdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)\GetAVIInfo;$(ProjectDir)\FaceSDK\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>facesdk.lib;F:\Windows Kits\10\Lib\10.0.18362.0\um\x86\Vfw32.Lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>copy $(SolutionDir)\FaceSDK\x86\facesdk.dll $(OutDir)\</Command>
+    </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>
+      </Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -92,15 +105,16 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <AdditionalLibraryDirectories>$(ProjectDir)\GetAVIInfo;$(ProjectDir)\FaceSDK;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)\GetAVIInfo;$(ProjectDir)\FaceSDK\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>facesdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(SolutionDir)\FaceSDK\facesdk.dll $(OutDir)\
+      <Command>copy $(SolutionDir)\FaceSDK\x64\facesdk.dll $(OutDir)\
 copy $(SolutionDir)\GetAVIInfo\GetAVIInfo.dll $(OutDir)\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -139,8 +153,8 @@ copy $(SolutionDir)\GetAVIInfo\GetAVIInfo.dll $(OutDir)\</Command>
     <ClInclude Include="FaceFinder\FaceFinder.h" />
     <ClInclude Include="FaceFinder\FrameRegion.h" />
     <ClInclude Include="FaceFinder\IFaceFinder.h" />
-    <ClInclude Include="FaceSDK\LuxandFaceSDK.h" />
     <ClInclude Include="Loaders\AviLoader.h" />
+    <ClInclude Include="Loaders\IAviLoader.h" />
     <ClInclude Include="Utils\Check.h" />
     <ClInclude Include="Utils\Consts.h" />
   </ItemGroup>
@@ -148,6 +162,7 @@ copy $(SolutionDir)\GetAVIInfo\GetAVIInfo.dll $(OutDir)\</Command>
     <ClCompile Include="FaceFinder\FaceFinder.cpp" />
     <ClCompile Include="FaceFinder\IFaceFinder.cpp" />
     <ClCompile Include="Loaders\AviLoader.cpp" />
+    <ClCompile Include="Loaders\IAviLoader.cpp" />
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

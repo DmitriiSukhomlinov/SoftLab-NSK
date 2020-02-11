@@ -27,9 +27,6 @@
     <ClInclude Include="FaceFinder\IFaceFinder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="FaceSDK\LuxandFaceSDK.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Utils\Check.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -37,6 +34,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Loaders\AviLoader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Loaders\IAviLoader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -51,6 +51,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Loaders\AviLoader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Loaders\IAviLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

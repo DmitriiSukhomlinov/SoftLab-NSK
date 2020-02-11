@@ -289,3 +289,6 @@ __pycache__/
 
 # Directories I want to ignore
 diploma/projects/Diploma_first/Diploma_first/samples/Me
+
+diploma/Program/FaceRecognition/_debug_x32
+diploma/Program/FaceRecognition/_debug_x64
