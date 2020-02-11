@@ -35,7 +35,8 @@ private:
     BITMAPINFO* bmpInfoIn;
     BITMAPINFO bmpInfoOut;
     AVIStreamHeader streamHeader;
-    unsigned char* decodedImage;
+    //unsigned char* decodedImage;
+    int decodedImageSize;
     int scanLine;
     HIC hic;//codec
     HANDLE myAvi;

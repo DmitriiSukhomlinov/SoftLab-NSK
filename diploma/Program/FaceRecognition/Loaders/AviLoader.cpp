@@ -1,7 +1,7 @@
 #include "AviLoader.h"
 #include "../Utils/Check.h"
 
-AviLoader::AviLoader() : avi(nullptr), totalFrames(0), decodedImage(nullptr), bmpInfoIn(nullptr), scanLine(0), frameNum(0) {}
+AviLoader::AviLoader() : avi(nullptr), totalFrames(0), /*decodedImage(nullptr),*/ decodedImageSize(0), bmpInfoIn(nullptr), scanLine(0), frameNum(0) {}
 
 AviLoader::~AviLoader() {
 
@@ -46,7 +46,8 @@ void AviLoader::loadFile(const std::string& path) {
     int miliSecPerFrame = 1000 * streamHeader.dwScale / streamHeader.dwRate;//milliseconds per frame
     const int additionalPixelsTwo = (bmpInfoIn->bmiHeader.biWidth * 3) % 4 == 0 ? 0 : 4 - (bmpInfoIn->bmiHeader.biWidth * 3) % 4;
     scanLine = (bmpInfoIn->bmiHeader.biWidth * 3) + additionalPixelsTwo;
-    decodedImage = new unsigned char[bmpInfoIn->bmiHeader.biHeight * scanLine];
+    decodedImageSize = bmpInfoIn->bmiHeader.biHeight * scanLine;
+    //decodedImage = new unsigned char[bmpInfoIn->bmiHeader.biHeight * scanLine];
 
     //hic = ICOpen(ICTYPE_VIDEO, streamHeader.fccHandler, ICMODE_DECOMPRESS); //open file for decompression
     if (hic == 0) { //if it didn't work...
@@ -64,8 +65,25 @@ unsigned char* AviLoader::readNextFrame() {
     unsigned long sizeOfFrame;
     unsigned long key;
     HRESULT hres = avi->GetVideoFrameInfo2(0, frameNum, &hiOf, &lowOf, &sizeOfFrame, &key);
-    CHECK_IF_FALSE_RETURN(hres == S_OK, "Video frame info 2 was got correctly.", "Can not got video frame info 2.", nullptr);
+    CHECK_IF_FALSE(hres == S_OK, nullptr);
 
+    //unsigned char* dataIn = new unsigned char[sizeOfFrame];
+    shared_ptr<unsigned char> dataIn(new unsigned char[sizeOfFrame]);
+    hres = SetFilePointer(myAvi, lowOf, &hiOf, FILE_BEGIN);
+    CHECK_IF_FALSE(hres == S_OK, nullptr);
+
+    unsigned long bytesWasRead = 0;
+    hres = ReadFile(myAvi, dataIn.get(), sizeOfFrame, &bytesWasRead, NULL);
+    CHECK_IF_FALSE(hres == S_OK, nullptr);
+
+    frameNum++;
+
+    bmpInfoIn->bmiHeader.biSizeImage = sizeOfFrame;
+    unsigned char* decodedImage = new unsigned char[decodedImageSize];
+    hres = ICDecompress(hic, key == 0 ? ICDECOMPRESS_NOTKEYFRAME : 0, &bmpInfoIn->bmiHeader, dataIn.get(), &bmpInfoOut.bmiHeader, decodedImage);
+    CHECK_IF_FALSE(hres == S_OK, nullptr);
+
+    return decodedImage;
 }
 
 void AviLoader::finish() {
