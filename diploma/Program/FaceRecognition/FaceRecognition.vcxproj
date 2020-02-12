@@ -89,7 +89,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <AdditionalLibraryDirectories>$(ProjectDir)\GetAVIInfo;$(ProjectDir)\FaceSDK\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>facesdk.lib;F:\Windows Kits\10\Lib\10.0.18362.0\um\x86\Vfw32.Lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>facesdk.lib;Vfw32.Lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>copy $(SolutionDir)\FaceSDK\x86\facesdk.dll $(OutDir)\</Command>

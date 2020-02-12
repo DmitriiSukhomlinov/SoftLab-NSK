@@ -29,14 +29,24 @@ public:
     unsigned char* readNextFrame() override;
     void finish() override;
 
+
+    int getSkanLine() const override;
+    int getFrameNumber() const override;
+    int getPictureWidth() const override;
+    int getPictureHeight() const override;
+    int getLastReadFrameNumber() const override;
+    bool hasFrameToRead() const override;
+
 private:
+    unsigned char* invertPicture(unsigned char* old);
+
     CComPtr <struct GETAVIINFOLib::IGetAVIInfo> avi;
     int totalFrames;
     BITMAPINFO* bmpInfoIn;
     BITMAPINFO bmpInfoOut;
     AVIStreamHeader streamHeader;
-    //unsigned char* decodedImage;
     int decodedImageSize;
+    unsigned char* decodedImage;
     int scanLine;
     HIC hic;//codec
     HANDLE myAvi;

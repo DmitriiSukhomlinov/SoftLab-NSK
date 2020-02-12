@@ -4,84 +4,97 @@
 
 #include "FaceSDK/LuxandFaceSDK.h"
 #include "FaceFinder/IFaceFinder.h"
-//#include "FaceFinder/FaceFinder.h"
 #include "Loaders/IAviLoader.h"
-#include "Loaders/AviLoader.h"
 #include "Utils/Check.h"
 #include "Utils/Consts.h"
 
-#include <iostream>
-
-unsigned char* readBmp(const std::string& path, BITMAPINFOHEADER& bmpInfo) {
-    FILE* bmp = fopen(path.c_str(), "rb");//Открываем файл для чтения побитово, НАДО УБРАТЬ ВОРНИНГ!!!
-
-    BITMAPFILEHEADER bmpHeader;
-    fread(&bmpHeader, 1, sizeof(BITMAPFILEHEADER), bmp);//Считываем FILEHEADER
-    fread(&bmpInfo, 1, sizeof(BITMAPINFOHEADER), bmp);//Считываем INFOHEADER
-    try//Обработка исключения
-    {
-        if ((bmpHeader.bfType != 0x4D42) || (bmpInfo.biBitCount != 24))//Проверка сигнатуры и глубины цвета
-        {
-            throw "Файл должен быть 24-х битным .bmp";
-        }
-    } catch (const char* )//Если файл не того формата - выкидываем исключение...
-    {
-        return nullptr;
-    }
-    //const long int dataSize = long int(bmpInfo.biHeight) * bmpInfo.biWidth * 3;
-    //const int scanLine = ((bmpInfo.biWidth * 32 + 31) & ~31) / 8 * 3;
-    const int byteWidth = bmpInfo.biWidth * 3;
-    const int additionalPixelsTwo = (byteWidth) % 4 == 0 ? 0 : 4 - (byteWidth) % 4;
-    const int scanLine = byteWidth + additionalPixelsTwo;
-    const long int dataSize = long int(bmpInfo.biHeight) * scanLine;
-    unsigned char* data = new unsigned char[dataSize];//Создаем массив для данных о растре
-    fseek(bmp, bmpHeader.bfOffBits, SEEK_SET);//Перемещаем указатель в потоке на то место, где начинается инфа оо RGB (Ну так, на всякий случай)
-    fread(data, 1, dataSize, bmp);//Данные прочитаны
-    fclose(bmp);//Закрываем файл, больше он нам ни к чему
-
-    unsigned char* invertedData = new unsigned char[dataSize];
-    for (int i = 0; i < bmpInfo.biHeight; i++) {
-        for (int j = 0; j < byteWidth; j = j + 3) {
-            invertedData[i * scanLine + j] = data[(bmpInfo.biHeight - 1 - i) * scanLine + j + 2];
-            invertedData[i * scanLine + j + 1] = data[(bmpInfo.biHeight - 1 - i) * scanLine + j + 1];
-            invertedData[i * scanLine + j + 2] = data[(bmpInfo.biHeight - 1 - i) * scanLine + j];
-        }
-    }
-    delete[]data;
-    return invertedData;
-}
+//unsigned char* readBmp(const std::string& path, BITMAPINFOHEADER& bmpInfo) {
+//    FILE* bmp = fopen(path.c_str(), "rb");//Открываем файл для чтения побитово, НАДО УБРАТЬ ВОРНИНГ!!!
+//
+//    BITMAPFILEHEADER bmpHeader;
+//    fread(&bmpHeader, 1, sizeof(BITMAPFILEHEADER), bmp);//Считываем FILEHEADER
+//    fread(&bmpInfo, 1, sizeof(BITMAPINFOHEADER), bmp);//Считываем INFOHEADER
+//    try//Обработка исключения
+//    {
+//        if ((bmpHeader.bfType != 0x4D42) || (bmpInfo.biBitCount != 24))//Проверка сигнатуры и глубины цвета
+//        {
+//            throw "Файл должен быть 24-х битным .bmp";
+//        }
+//    } catch (const char* )//Если файл не того формата - выкидываем исключение...
+//    {
+//        return nullptr;
+//    }
+//    //const long int dataSize = long int(bmpInfo.biHeight) * bmpInfo.biWidth * 3;
+//    //const int scanLine = ((bmpInfo.biWidth * 32 + 31) & ~31) / 8 * 3;
+//    const int byteWidth = bmpInfo.biWidth * 3;
+//    const int additionalPixelsTwo = (byteWidth) % 4 == 0 ? 0 : 4 - (byteWidth) % 4;
+//    const int scanLine = byteWidth + additionalPixelsTwo;
+//    const long int dataSize = long int(bmpInfo.biHeight) * scanLine;
+//    unsigned char* data = new unsigned char[dataSize];//Создаем массив для данных о растре
+//    fseek(bmp, bmpHeader.bfOffBits, SEEK_SET);//Перемещаем указатель в потоке на то место, где начинается инфа оо RGB (Ну так, на всякий случай)
+//    fread(data, 1, dataSize, bmp);//Данные прочитаны
+//    fclose(bmp);//Закрываем файл, больше он нам ни к чему
+//
+//    unsigned char* invertedData = new unsigned char[dataSize];
+//    for (int i = 0; i < bmpInfo.biHeight; i++) {
+//        for (int j = 0; j < byteWidth; j = j + 3) {
+//            invertedData[i * scanLine + j] = data[(bmpInfo.biHeight - 1 - i) * scanLine + j + 2];
+//            invertedData[i * scanLine + j + 1] = data[(bmpInfo.biHeight - 1 - i) * scanLine + j + 1];
+//            invertedData[i * scanLine + j + 2] = data[(bmpInfo.biHeight - 1 - i) * scanLine + j];
+//        }
+//    }
+//    delete[]data;
+//    return invertedData;
+//}
 
 int main() {
-    //IAviLoader* aviLoader = IAviLoader::createAviLoader();
-    IAviLoader* aviLoader = new AviLoader;
-
-    aviLoader->init();
-    aviLoader->loadFile("");
-
     int result = FSDK_ActivateLibrary(key);
     CHECK_IF_FALSE_RETURN(result == FSDKE_OK, "Correct key", "Activation error", 0);
 
     result = FSDK_Initialize(dllPath);
     CHECK_IF_FALSE_RETURN(result == FSDKE_OK, "Correct initialization of the dll", "Initialization error", 0);
 
-    IFaceFinder* ff = IFaceFinder::createFaceFinder();
-    ff->init();
-    for (int i = 0; i < 7; i++) {
-        std::string path = "F:/pic" + std::to_string(i) + ".bmp";
-        BITMAPINFOHEADER bmpInfo;
-        unsigned char* res = readBmp(path, bmpInfo);
-        const int additionalPixelsTwo = (bmpInfo.biWidth * 3) % 4 == 0 ? 0 : 4 - (bmpInfo.biWidth * 3) % 4;
-        const int scanLine = (bmpInfo.biWidth  * 3 ) + additionalPixelsTwo;
-        //const int scanLine = ((bmpInfo.biWidth * 32 + 31) & ~31) / 8 * 3;
+    IAviLoader* aviLoader = IAviLoader::createAviLoader();
+    IFaceFinder* faceFinder = IFaceFinder::createFaceFinder();
 
-        ff->addImage(i, res, bmpInfo.biWidth, bmpInfo.biHeight, scanLine, IFaceFinder::ColorDepth::Bit24);
-        delete[]res;
+    aviLoader->init();
+    faceFinder->init();
+
+    aviLoader->loadFile("F:/softlab-nsk/avi/donkey.avi");
+
+    const int width = aviLoader->getPictureWidth();
+    const int height = aviLoader->getPictureHeight();
+    const int scanLine = aviLoader->getSkanLine();
+
+    while (aviLoader->hasFrameToRead()) {
+        unsigned char* data = aviLoader->readNextFrame();
+        CHECK_IF_FALSE_CONTINUE_NO_MESSAGE((nullptr != data));
+
+        int curentDataFrameNumber = aviLoader->getLastReadFrameNumber();
+        faceFinder->addImage(curentDataFrameNumber, data, width, height, scanLine, IFaceFinder::ColorDepth::Bit24);
+        delete[]data;
     }
-    ff->finish();
 
-    delete ff;
+    //for (int i = 0; i < 7; i++) {
+    //    //std::string path = "F:/pic" + std::to_string(i) + ".bmp";
+    //    //BITMAPINFOHEADER bmpInfo;
+    //    //unsigned char* res = readBmp(path, bmpInfo);
+    //    //const int additionalPixelsTwo = (bmpInfo.biWidth * 3) % 4 == 0 ? 0 : 4 - (bmpInfo.biWidth * 3) % 4;
+    //    //const int scanLine = (bmpInfo.biWidth  * 3 ) + additionalPixelsTwo;
+    //    ////const int scanLine = ((bmpInfo.biWidth * 32 + 31) & ~31) / 8 * 3;
+    //    unsigned char* data = aviLoader->readNextFrame();
+    //    CHECK_IF_FALSE_CONTINUE_NO_MESSAGE((nullptr != data));
 
-    
+    //    faceFinder->addImage(i, data, width, height, scanLine, IFaceFinder::ColorDepth::Bit24);
+    //    delete[]data;
+    //}
+
+    aviLoader->finish();
+    faceFinder->finish();
+
+    delete aviLoader;
+    delete faceFinder;
+  
     /*
     Для тестирования!
 

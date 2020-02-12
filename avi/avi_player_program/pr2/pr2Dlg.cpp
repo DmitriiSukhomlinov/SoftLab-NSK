@@ -329,7 +329,7 @@ Cpr2Dlg::m_ReadFrameStatus Cpr2Dlg::TryFrameRead(int& numOfReadFrame, bool recur
     unsigned long lowOf;
     unsigned long sizeOfFrame;
     unsigned long key;
-    m_pAVI->GetVideoFrameInf(0, numOfReadFrame, &hiOf, &lowOf, &sizeOfFrame, &key);
+    m_pAVI->GetVideoFrameInfo2(0, numOfReadFrame, &hiOf, &lowOf, &sizeOfFrame, &key);
     if (((key == 0) || (sizeOfFrame == 0)) && (numOfReadFrame != m_nLastReadFrame + 1))
     {
         int numOfFrameToRecursion = numOfReadFrame - 1;
