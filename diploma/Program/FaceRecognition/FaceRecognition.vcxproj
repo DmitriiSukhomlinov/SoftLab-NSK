@@ -111,11 +111,11 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <AdditionalLibraryDirectories>$(ProjectDir)\GetAVIInfo;$(ProjectDir)\FaceSDK\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>facesdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>facesdk.lib;Vfw32.Lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(SolutionDir)\FaceSDK\x64\facesdk.dll $(OutDir)\
-copy $(SolutionDir)\GetAVIInfo\GetAVIInfo.dll $(OutDir)\</Command>
+      <Command>copy $(SolutionDir)FaceSDK\x64\facesdk.dll $(OutDir)\
+copy $(SolutionDir)\GetAVIInfo\x64\GetAVIInfo.dll $(OutDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

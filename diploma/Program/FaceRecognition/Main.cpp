@@ -60,7 +60,7 @@ int main() {
     aviLoader->init();
     faceFinder->init();
 
-    aviLoader->loadFile("F:/softlab-nsk/avi/donkey.avi");
+    aviLoader->loadFile("C:/Users/sukho/OneDrive/Desktop/GetAVIInfo/faces2.avi");
 
     const int width = aviLoader->getPictureWidth();
     const int height = aviLoader->getPictureHeight();
