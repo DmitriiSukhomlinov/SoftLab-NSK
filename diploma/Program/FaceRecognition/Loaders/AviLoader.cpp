@@ -77,7 +77,7 @@ unsigned char* AviLoader::readNextFrame() {
     bool wasRead = ReadFile(myAvi, dataIn.get(), sizeOfFrame, &bytesWasRead, NULL);
 
     bmpInfoIn->bmiHeader.biSizeImage = sizeOfFrame;
-    DWORD res = ICDecompress(hic, key == 16 ? ICDECOMPRESS_NOTKEYFRAME : 0, &bmpInfoIn->bmiHeader, dataIn.get(), &bmpInfoOut.bmiHeader, decodedImage);
+    DWORD res = ICDecompress(hic, key != 16 ? ICDECOMPRESS_NOTKEYFRAME : 0, &bmpInfoIn->bmiHeader, dataIn.get(), &bmpInfoOut.bmiHeader, decodedImage);
     checkReturn(res);
     CHECK_IF_FALSE(res == ICERR_OK, nullptr);
 
@@ -109,7 +109,7 @@ int AviLoader::getLastReadFrameNumber() const {
 }
 
 bool AviLoader::hasFrameToRead() const {
-    return frameNum != totalFrames;
+    return frameNum != totalFrames - 1;
 }
 
 unsigned char* AviLoader::invertPicture(unsigned char* old) {

@@ -99,6 +99,10 @@ private:
     static const std::map<ColorDepth, FSDK_IMAGEMODE> COLOR_DEPTH_CORRELATION;
     static const double SIMILARITY_THRESHOLD;
     static const int MAX_FACE_COUNT;
+
+    //вспомогательные функции для записи файлов
+    static const std::string PICTURES_DIRECTORY;
+    static std::string getPicturesDirectory();
 };
 
 #endif // !_FACE_FINDER_

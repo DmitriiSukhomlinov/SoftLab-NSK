@@ -1,6 +1,6 @@
 #include "IAviLoader.h"
 #include "AviLoader.h"
 
-IAviLoader* IAviLoader::createAviLoader() {
+ILoader* ILoader::createLoader() {
     return new AviLoader;
 }

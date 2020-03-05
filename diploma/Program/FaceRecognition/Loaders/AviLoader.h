@@ -14,7 +14,7 @@
 
 #include <string>
 
-class AviLoader : public IAviLoader {
+class AviLoader : public ILoader {
 public:
     AviLoader();
 

@@ -54,23 +54,26 @@ int main() {
     result = FSDK_Initialize(dllPath);
     CHECK_IF_FALSE_RETURN(result == FSDKE_OK, "Correct initialization of the dll", "Initialization error", 0);
 
-    IAviLoader* aviLoader = IAviLoader::createAviLoader();
+    ILoader* loader = ILoader::createLoader();
     IFaceFinder* faceFinder = IFaceFinder::createFaceFinder();
 
-    aviLoader->init();
+    loader->init();
     faceFinder->init();
 
-    aviLoader->loadFile("C:/Users/sukho/OneDrive/Desktop/GetAVIInfo/faces2.avi");
+    loader->loadFile("C:/Users/sukho/OneDrive/Desktop/GetAVIInfo/faces2.avi");
 
-    const int width = aviLoader->getPictureWidth();
-    const int height = aviLoader->getPictureHeight();
-    const int scanLine = aviLoader->getSkanLine();
+    const int width = loader->getPictureWidth();
+    const int height = loader->getPictureHeight();
+    const int scanLine = loader->getSkanLine();
 
-    while (aviLoader->hasFrameToRead()) {
-        unsigned char* data = aviLoader->readNextFrame();
+    while (loader->hasFrameToRead()) {
+        unsigned char* data = loader->readNextFrame();
         CHECK_IF_FALSE_CONTINUE_NO_MESSAGE((nullptr != data));
 
-        int curentDataFrameNumber = aviLoader->getLastReadFrameNumber();
+        int curentDataFrameNumber = loader->getLastReadFrameNumber();
+        if (curentDataFrameNumber % 100 != 0) {
+            //continue;
+        }
         faceFinder->addImage(curentDataFrameNumber, data, width, height, scanLine, IFaceFinder::ColorDepth::Bit24);
         delete[]data;
     }
@@ -89,10 +92,10 @@ int main() {
     //    delete[]data;
     //}
 
-    aviLoader->finish();
+    loader->finish();
     faceFinder->finish();
 
-    delete aviLoader;
+    delete loader;
     delete faceFinder;
   
     /*

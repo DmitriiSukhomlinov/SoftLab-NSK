@@ -1,10 +1,22 @@
 #include "FaceFinder.h"
 
 #include "..\Utils\Check.h"
+#include <io.h>
+#include <algorithm>
+#include <direct.h>
+#include <filesystem>
 
 /*************************************/
 /*************FaceFinder**************/
 /*************************************/
+
+const std::string FaceFinder::PICTURES_DIRECTORY = getPicturesDirectory();
+
+std::string FaceFinder::getPicturesDirectory() {
+    TCHAR currentDir[MAX_PATH];
+    GetCurrentDirectory(MAX_PATH, currentDir);
+    return std::string(currentDir) + "\\pictures\\";
+}
 
 const std::map<IFaceFinder::ColorDepth, FSDK_IMAGEMODE> FaceFinder::COLOR_DEPTH_CORRELATION  = { {ColorDepth::Bit8, FSDK_IMAGE_GRAYSCALE_8BIT},
                                                                                                  {ColorDepth::Bit24, FSDK_IMAGE_COLOR_24BIT}, 
@@ -20,27 +32,34 @@ FaceFinder::~FaceFinder() {
 }
 
 void FaceFinder::init() {
+    cout << "FaceFinder initializing";
     clearAll();
+    std::filesystem::remove_all(std::filesystem::path(PICTURES_DIRECTORY));
 }
 
+
 void FaceFinder::addImage(const int _frameNumber, void* inputVideoBuffer, const int xPictureSize, const int yPictureSize, const int scanLine, const ColorDepth colorDepth) {
-//void FaceFinder::addImage(const int _frameNumber, const std::string& path) {
     shared_ptr<HImage> image(new HImage);
     unsigned char* data = static_cast<unsigned char*>(inputVideoBuffer);
     FSDK_IMAGEMODE mode = COLOR_DEPTH_CORRELATION.at(colorDepth);
     int result = FSDK_LoadImageFromBuffer(image.get(), data, xPictureSize, yPictureSize, scanLine, mode);//!
-    //int result = FSDK_LoadImageFromFile(image.get(), path.c_str());//!
     CHECK_IF_FALSE_RETURN_NO_OK_MESSAGE(result == FSDKE_OK, "Error in the loading process, error code " << result, );
 
     int facesCount = 0;
     shared_ptr<TFacePosition> facePositionPointer(new TFacePosition[MAX_FACE_COUNT]);
-    result = FSDK_SaveImageToFile(*image.get(), "F:/new.pick");
+    //result = FSDK_SaveImageToFile(*image.get(), "F:/new.pick");
     //Есть вопрос выбора этого значения.
     //Если у нас изображение с глубиной цвета 24 бит и на нем есть два лица, то для того, чтобы они оба оказались определены, 
     //значение maxSizeInBytes нужно выставить на 24*2=48 как минимум. Если выставить от 24 до 48, то найдется только одно лицо. 
     //Если меньше 24 - то не найдет ни одного
     //Кстати, это можно обработать, потому что если он не вернет лиц из-за недостаточного значения, то код ошибки будет FSDKE_INSUFFICIENT_BUFFER_SIZE(-8)
     result = FSDK_DetectMultipleFaces(*image.get(), &facesCount, facePositionPointer.get(), sizeof(TFacePosition) * MAX_FACE_COUNT);
+    if (result == FSDKE_FACE_NOT_FOUND) {
+        const std::string not_found = PICTURES_DIRECTORY + "not_found\\";
+        std::filesystem::create_directories(std::filesystem::path(not_found));
+        std::string out = not_found + to_string(_frameNumber) + ".bmp";
+        result = FSDK_SaveImageToFile(*image.get(), out.c_str());
+    }
     CHECK_IF_FALSE_RETURN_NO_OK_MESSAGE(result == FSDKE_OK, "Error in the face detecting process, error code " << result, );
     CHECK_IF_FALSE(facesCount != 0, );
 
@@ -76,10 +95,26 @@ void FaceFinder::addImage(const int _frameNumber, void* inputVideoBuffer, const 
                 tmpDesc->facePosition = new TFacePosition (facePositionArray[i]);//ПРОВЕРИТЬ!!!!
                 tmpDesc->faceTemplate = faceTemplate;
             }
+
+            int num = -1;
+            for (int i = 0; i < tempDescriptions.size(); i++) {
+                if (tmpDesc == tempDescriptions[i]) {
+                    num = i;
+                    break;
+                }
+            }
+            const std::string dir = PICTURES_DIRECTORY + to_string(num) + "\\";
+            std::string out = dir + to_string(_frameNumber) + ".bmp";
+            result = FSDK_SaveImageToFile(*image.get(), out.c_str());
         }
 
         if (createNewFaceDesription) {
             tempDescriptions.push_back(new FaceDescriptionTemp(_frameNumber, new TFacePosition(facePositionArray[i]), faceTemplate));
+
+            const std::string newDir = PICTURES_DIRECTORY + to_string(tempDescriptions.size()) + "\\";
+            std::filesystem::create_directories(std::filesystem::path(newDir));
+            std::string out = newDir + to_string(_frameNumber) + ".bmp";
+            result = FSDK_SaveImageToFile(*image.get(), out.c_str());
         }
 
         /*
@@ -119,7 +154,15 @@ void FaceFinder::addImage(const int _frameNumber, void* inputVideoBuffer, const 
 }
 
 void FaceFinder::finish() {
-    for (auto& tmpDesc : tempDescriptions) {
+    cout << "FaceFinder finalizing";
+
+    std::vector<FaceDescriptionTemp*> roughtTempDescriptions;
+    for (const auto& tmpDesc : tempDescriptions) {
+
+    }
+
+
+    for (const auto& tmpDesc : tempDescriptions) {
         FaceDescription* faceDescription = createFaceDescription((int)sizeof(FSDK_FaceTemplate));
         fillFaceDescription(faceDescription, tmpDesc->bestFrame, tmpDesc->facePosition->xc, tmpDesc->facePosition->yc, tmpDesc->facePosition->w, 0, (int)sizeof(*tmpDesc->faceTemplate));
         CopyMemory(faceDescription->faceTemplate, tmpDesc->faceTemplate, sizeof(FSDK_FaceTemplate));

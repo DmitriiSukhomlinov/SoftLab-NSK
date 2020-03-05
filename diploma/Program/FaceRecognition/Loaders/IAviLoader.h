@@ -2,15 +2,15 @@
 
 #include <string>
 
-class IAviLoader {
+class ILoader {
 public:
-    IAviLoader(const IAviLoader& other) = default;
-    IAviLoader(IAviLoader&& other) noexcept = default;
-    ~IAviLoader() = default;
-    IAviLoader& operator=(const IAviLoader& other) = default;
-    IAviLoader& operator=(IAviLoader&& other) noexcept = default;
+    ILoader(const ILoader& other) = default;
+    ILoader(ILoader&& other) noexcept = default;
+    ~ILoader() = default;
+    ILoader& operator=(const ILoader& other) = default;
+    ILoader& operator=(ILoader&& other) noexcept = default;
 
-    static IAviLoader* createAviLoader();
+    static ILoader* createLoader();
 
     virtual void init() = 0;
     virtual void loadFile(const std::string& path) = 0;
@@ -25,6 +25,6 @@ public:
     virtual bool hasFrameToRead() const = 0;
 
 protected:
-    IAviLoader() = default;
+    ILoader() = default;
 
 };
