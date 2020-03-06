@@ -44,7 +44,6 @@ void AviLoader::loadFile(const std::string& path) {
     hres = avi->GetVideoStreamInfo(0, (unsigned char*)&streamHeader, sizeof(streamHeader), &tmp, NULL, NULL);
     CHECK_IF_FALSE_RETURN(hres == S_OK, "Video stream info was got correctly.", "Video stream info getting error.", );
 
-    int miliSecPerFrame = 1000 * streamHeader.dwScale / streamHeader.dwRate;//milliseconds per frame
     const int additionalPixelsTwo = (bmpInfoIn->bmiHeader.biWidth * 3) % 4 == 0 ? 0 : 4 - (bmpInfoIn->bmiHeader.biWidth * 3) % 4;
     scanLine = (bmpInfoIn->bmiHeader.biWidth * 3) + additionalPixelsTwo;
     decodedImageSize = bmpInfoIn->bmiHeader.biHeight * scanLine;
@@ -75,10 +74,11 @@ unsigned char* AviLoader::readNextFrame() {
 
     unsigned long bytesWasRead = 0;
     bool wasRead = ReadFile(myAvi, dataIn.get(), sizeOfFrame, &bytesWasRead, NULL);
+    CHECK_IF_FALSE(wasRead, nullptr);
 
     bmpInfoIn->bmiHeader.biSizeImage = sizeOfFrame;
     DWORD res = ICDecompress(hic, key != 16 ? ICDECOMPRESS_NOTKEYFRAME : 0, &bmpInfoIn->bmiHeader, dataIn.get(), &bmpInfoOut.bmiHeader, decodedImage);
-    checkReturn(res);
+   // checkReturn(res);
     CHECK_IF_FALSE(res == ICERR_OK, nullptr);
 
     return invertPicture(decodedImage);
@@ -121,53 +121,54 @@ unsigned char* AviLoader::invertPicture(unsigned char* old) {
             invertedData[i * scanLine + j + 2] = old[(bmpInfoOut.bmiHeader.biHeight - 1 - i) * scanLine + j];
         }
     }
+    //delete old;
 
     return invertedData;
 
 }
 
-void AviLoader::checkReturn(const DWORD& res) const {
-    if (res == ICERR_OK) {
-        int i = 0;
-    } else if (res == ICERR_DONTDRAW) {
-        int i = 0;
-    } else if (res == ICERR_NEWPALETTE) {
-        int i = 0;
-    } else if (res == ICERR_GOTOKEYFRAME) {
-        int i = 0;
-    } else if (res == ICERR_GOTOKEYFRAME) {
-        int i = 0;
-    } else if (res == ICERR_STOPDRAWING) {
-        int i = 0;
-    } else if (res == ICERR_UNSUPPORTED) {
-        int i = 0;
-    } else if (res == ICERR_BADFORMAT) {
-        int i = 0;
-    } else if (res == ICERR_MEMORY) {
-        int i = 0;
-    } else if (res == ICERR_INTERNAL) {
-        int i = 0;
-    } else if (res == ICERR_BADFLAGS) {
-        int i = 0;
-    } else if (res == ICERR_BADPARAM) {
-        int i = 0;
-    } else if (res == ICERR_BADSIZE) {
-        int i = 0;
-    } else if (res == ICERR_BADHANDLE) {
-        int i = 0;
-    } else if (res == ICERR_CANTUPDATE) {
-        int i = 0;
-    } else if (res == ICERR_ABORT) {
-        int i = 0;
-    } else if (res == ICERR_ERROR) {
-        int i = 0;
-    } else if (res == ICERR_BADBITDEPTH) {
-        int i = 0;
-    } else if (res == ICERR_BADIMAGESIZE) {
-        int i = 0;
-    } else if (res == ICERR_CUSTOM) {
-        int i = 0;
-    } else {
-        int i = 0;
-    }
-}
+//void AviLoader::checkReturn(const DWORD& res) const {
+//    if (res == ICERR_OK) {
+//        int i = 0;
+//    } else if (res == ICERR_DONTDRAW) {
+//        int i = 0;
+//    } else if (res == ICERR_NEWPALETTE) {
+//        int i = 0;
+//    } else if (res == ICERR_GOTOKEYFRAME) {
+//        int i = 0;
+//    } else if (res == ICERR_GOTOKEYFRAME) {
+//        int i = 0;
+//    } else if (res == ICERR_STOPDRAWING) {
+//        int i = 0;
+//    } else if (res == ICERR_UNSUPPORTED) {
+//        int i = 0;
+//    } else if (res == ICERR_BADFORMAT) {
+//        int i = 0;
+//    } else if (res == ICERR_MEMORY) {
+//        int i = 0;
+//    } else if (res == ICERR_INTERNAL) {
+//        int i = 0;
+//    } else if (res == ICERR_BADFLAGS) {
+//        int i = 0;
+//    } else if (res == ICERR_BADPARAM) {
+//        int i = 0;
+//    } else if (res == ICERR_BADSIZE) {
+//        int i = 0;
+//    } else if (res == ICERR_BADHANDLE) {
+//        int i = 0;
+//    } else if (res == ICERR_CANTUPDATE) {
+//        int i = 0;
+//    } else if (res == ICERR_ABORT) {
+//        int i = 0;
+//    } else if (res == ICERR_ERROR) {
+//        int i = 0;
+//    } else if (res == ICERR_BADBITDEPTH) {
+//        int i = 0;
+//    } else if (res == ICERR_BADIMAGESIZE) {
+//        int i = 0;
+//    } else if (res == ICERR_CUSTOM) {
+//        int i = 0;
+//    } else {
+//        int i = 0;
+//    }
+//}

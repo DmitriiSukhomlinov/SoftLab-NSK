@@ -86,10 +86,14 @@ private:
         FSDK_FaceTemplate* faceTemplate;
     };
 
-    bool isNewFaceBetter() const;
+    inline bool isNewFaceBetter(FSDK_FaceTemplate* currentFace, FSDK_FaceTemplate* newFace) const;
     void clearDescriptions();
     void clearTempDescriptions();
     void clearAll();
+
+    void saveNotFound(const int frameNumber, HImage* image);
+    void saveFirstTime(const int frameNumber, HImage* image);
+    void saveAlreadyFound(const int frameNumber, HImage* image, FaceDescriptionTemp* tmpDesc);
 
     //Конечная информация - заполняется при вызове finish
     std::vector<DescriptionData*> descriptions;

@@ -39,7 +39,7 @@ public:
 
 private:
     unsigned char* invertPicture(unsigned char* old);
-    void checkReturn(const DWORD& res) const;
+    //void checkReturn(const DWORD& res) const;
 
     CComPtr <struct GETAVIINFOLib::IGetAVIInfo> avi;
     int totalFrames;

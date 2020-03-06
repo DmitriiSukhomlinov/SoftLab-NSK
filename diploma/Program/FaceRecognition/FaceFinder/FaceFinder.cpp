@@ -55,24 +55,21 @@ void FaceFinder::addImage(const int _frameNumber, void* inputVideoBuffer, const 
     //Кстати, это можно обработать, потому что если он не вернет лиц из-за недостаточного значения, то код ошибки будет FSDKE_INSUFFICIENT_BUFFER_SIZE(-8)
     result = FSDK_DetectMultipleFaces(*image.get(), &facesCount, facePositionPointer.get(), sizeof(TFacePosition) * MAX_FACE_COUNT);
     if (result == FSDKE_FACE_NOT_FOUND) {
-        const std::string not_found = PICTURES_DIRECTORY + "not_found\\";
-        std::filesystem::create_directories(std::filesystem::path(not_found));
-        std::string out = not_found + to_string(_frameNumber) + ".bmp";
-        result = FSDK_SaveImageToFile(*image.get(), out.c_str());
+        saveNotFound(_frameNumber, image.get());
     }
-    CHECK_IF_FALSE_RETURN_NO_OK_MESSAGE(result == FSDKE_OK, "Error in the face detecting process, error code " << result, );
+    CHECK_IF_FALSE(result == FSDKE_OK, );
     CHECK_IF_FALSE(facesCount != 0, );
 
     TFacePosition* facePositionArray = facePositionPointer.get();
     for (int i = 0; i < facesCount; i++) {
-        FSDK_FaceTemplate* faceTemplate = new FSDK_FaceTemplate;
-        result = FSDK_GetFaceTemplateInRegion(*image, &facePositionArray[i], faceTemplate);
+        std::shared_ptr<FSDK_FaceTemplate> faceTemplate(new FSDK_FaceTemplate);
+        result = FSDK_GetFaceTemplateInRegion(*image, &facePositionArray[i], faceTemplate.get());
         CHECK_IF_FALSE_CONTINUE(result == FSDKE_OK, "Cannot get face template, error code " << result);
 
         bool createNewFaceDesription = true;
         for (auto& tmpDesc : tempDescriptions) {
             float similarity = 0.0;
-            result = FSDK_MatchFaces(faceTemplate, tmpDesc->faceTemplate, &similarity);
+            result = FSDK_MatchFaces(faceTemplate.get(), tmpDesc->faceTemplate, &similarity);
             CHECK_IF_FALSE_CONTINUE_NO_MESSAGE((similarity >= SIMILARITY_THRESHOLD));
 
             createNewFaceDesription = false;
@@ -88,38 +85,25 @@ void FaceFinder::addImage(const int _frameNumber, void* inputVideoBuffer, const 
                 FrameRegion* newFrame = new FrameRegion(_frameNumber);//ПРОВЕРИТЬ!!!
                 tmpDesc->frameRegions.push_back(newFrame);
             }
-
             // выбрать лучшее лицо
-            if (isNewFaceBetter()) {
+            if (isNewFaceBetter(tmpDesc->faceTemplate, faceTemplate.get())) {
                 tmpDesc->bestFrame = _frameNumber;
+                //delete tmpDesc->facePosition;
                 tmpDesc->facePosition = new TFacePosition (facePositionArray[i]);//ПРОВЕРИТЬ!!!!
-                tmpDesc->faceTemplate = faceTemplate;
+                //delete tmpDesc->faceTemplate;
+                CopyMemory(tmpDesc->faceTemplate, faceTemplate.get(), sizeof(FSDK_FaceTemplate));
             }
 
-            int num = -1;
-            for (int i = 0; i < tempDescriptions.size(); i++) {
-                if (tmpDesc == tempDescriptions[i]) {
-                    num = i;
-                    break;
-                }
-            }
-            const std::string dir = PICTURES_DIRECTORY + to_string(num) + "\\";
-            std::string out = dir + to_string(_frameNumber) + ".bmp";
-            result = FSDK_SaveImageToFile(*image.get(), out.c_str());
+            saveAlreadyFound(_frameNumber, image.get(), tmpDesc);
         }
 
         if (createNewFaceDesription) {
-            tempDescriptions.push_back(new FaceDescriptionTemp(_frameNumber, new TFacePosition(facePositionArray[i]), faceTemplate));
+            tempDescriptions.push_back(new FaceDescriptionTemp(_frameNumber, new TFacePosition(facePositionArray[i]), faceTemplate.get()));
 
-            const std::string newDir = PICTURES_DIRECTORY + to_string(tempDescriptions.size()) + "\\";
-            std::filesystem::create_directories(std::filesystem::path(newDir));
-            std::string out = newDir + to_string(_frameNumber) + ".bmp";
-            result = FSDK_SaveImageToFile(*image.get(), out.c_str());
+            saveFirstTime(_frameNumber, image.get());
         }
 
         /*
-
-
         //Проверим если уже есть в массиве
         for (auto& v : descriptions) {
             //Вот тут у меня возникает закономерный вопрос - какием образом мне здесь провернуть операцию присваивания, чтобы в FSDK_FaceTemplate поместить то, что у нас сохранено?
@@ -156,10 +140,12 @@ void FaceFinder::addImage(const int _frameNumber, void* inputVideoBuffer, const 
 void FaceFinder::finish() {
     cout << "FaceFinder finalizing";
 
-    std::vector<FaceDescriptionTemp*> roughtTempDescriptions;
-    for (const auto& tmpDesc : tempDescriptions) {
-
-    }
+    //std::vector<FaceDescriptionTemp*> roughtTempDescriptions;
+    //for (auto tmpDesc : tempDescriptions) {
+    //    for (auto tmpDesc2 : tempDescriptions) {
+    //        CHECK_IF_FALSE_CONTINUE_NO_MESSAGE(tmpDesc)
+    //    }
+    //}
 
 
     for (const auto& tmpDesc : tempDescriptions) {
@@ -211,9 +197,10 @@ FrameRegion* FaceFinder::getFaceRegionByIndex(int index, int frameNum) const {
     return descriptions.at(frameNum)->frameRegions.at(frameNum);
 }
 
-bool FaceFinder::isNewFaceBetter() const {
-
-    return true;
+bool FaceFinder::isNewFaceBetter(FSDK_FaceTemplate* currentFace, FSDK_FaceTemplate* newFace) const {
+    float currentTemplateNorm = (float)currentFace->ftemplate[12];
+    float newTemplateNorm = (float)newFace->ftemplate[12];
+    return currentTemplateNorm < newTemplateNorm;
 }
 
 void FaceFinder::clearDescriptions() {
@@ -234,6 +221,37 @@ void FaceFinder::clearAll() {
     clearDescriptions();
     clearTempDescriptions();
 }
+
+void FaceFinder::saveNotFound(const int frameNumber, HImage* image) {
+    return;
+    const std::string not_found = PICTURES_DIRECTORY + "not_found\\";
+    std::filesystem::create_directories(std::filesystem::path(not_found));
+    std::string out = not_found + to_string(frameNumber) + ".bmp";
+    FSDK_SaveImageToFile(*image, out.c_str());
+}
+
+void FaceFinder::saveFirstTime(const int frameNumber, HImage* image) {
+    return;
+    const std::string newDir = PICTURES_DIRECTORY + to_string(tempDescriptions.size()) + "\\";
+    std::filesystem::create_directories(std::filesystem::path(newDir));
+    std::string out = newDir + to_string(frameNumber) + ".bmp";
+    FSDK_SaveImageToFile(*image, out.c_str());
+}
+
+void FaceFinder::saveAlreadyFound(const int frameNumber, HImage* image, FaceDescriptionTemp* tmpDesc) {
+    return;
+    int num = -1;
+    for (int j = 0; j < tempDescriptions.size(); j++) {
+        if (tmpDesc == tempDescriptions[j]) {
+            num = j;
+            break;
+        }
+    }
+    const std::string dir = PICTURES_DIRECTORY + to_string(num) + "\\";
+    std::string out = dir + to_string(frameNumber) + ".bmp";
+    FSDK_SaveImageToFile(*image, out.c_str());
+}
+
 
 /*************************************/
 /************DescriptionData**********/
