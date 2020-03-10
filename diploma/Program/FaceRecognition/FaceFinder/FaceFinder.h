@@ -91,9 +91,9 @@ private:
     void clearTempDescriptions();
     void clearAll();
 
-    void saveNotFound(const int frameNumber, HImage* image);
-    void saveFirstTime(const int frameNumber, HImage* image);
-    void saveAlreadyFound(const int frameNumber, HImage* image, FaceDescriptionTemp* tmpDesc);
+    void saveNotFound(const int frameNumber, HImage image);
+    void saveFirstTime(const int frameNumber, HImage image);
+    void saveAlreadyFound(const int frameNumber, HImage image, FaceDescriptionTemp* tmpDesc);
 
     //Конечная информация - заполняется при вызове finish
     std::vector<DescriptionData*> descriptions;

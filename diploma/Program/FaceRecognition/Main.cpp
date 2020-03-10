@@ -8,6 +8,10 @@
 #include "Utils/Check.h"
 #include "Utils/Consts.h"
 
+#include <thread>         // std::this_thread::sleep_for
+#include <chrono>
+
+
 //unsigned char* readBmp(const std::string& path, BITMAPINFOHEADER& bmpInfo) {
 //    FILE* bmp = fopen(path.c_str(), "rb");//Открываем файл для чтения побитово, НАДО УБРАТЬ ВОРНИНГ!!!
 //
@@ -75,7 +79,8 @@ int main() {
             //continue;
         }
         faceFinder->addImage(curentDataFrameNumber, data, width, height, scanLine, IFaceFinder::ColorDepth::Bit24);
-        delete[]data;
+
+        delete[] data;
     }
 
     //for (int i = 0; i < 7; i++) {

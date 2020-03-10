@@ -5,7 +5,6 @@
 #include <algorithm>
 #include <direct.h>
 #include <filesystem>
-
 /*************************************/
 /*************FaceFinder**************/
 /*************************************/
@@ -39,11 +38,16 @@ void FaceFinder::init() {
 
 
 void FaceFinder::addImage(const int _frameNumber, void* inputVideoBuffer, const int xPictureSize, const int yPictureSize, const int scanLine, const ColorDepth colorDepth) {
-    shared_ptr<HImage> image(new HImage);
+    HImage image;
     unsigned char* data = static_cast<unsigned char*>(inputVideoBuffer);
     FSDK_IMAGEMODE mode = COLOR_DEPTH_CORRELATION.at(colorDepth);
-    int result = FSDK_LoadImageFromBuffer(image.get(), data, xPictureSize, yPictureSize, scanLine, mode);//!
+    int result = FSDK_LoadImageFromBuffer(&image, data, xPictureSize, yPictureSize, scanLine, mode);//!
     CHECK_IF_FALSE_RETURN_NO_OK_MESSAGE(result == FSDKE_OK, "Error in the loading process, error code " << result, );
+    if (result != FSDKE_OK) {
+        FSDK_FreeImage(image);
+        cout << "Error in the loading process, error code " << result;
+        return;
+    }
 
     int facesCount = 0;
     shared_ptr<TFacePosition> facePositionPointer(new TFacePosition[MAX_FACE_COUNT]);
@@ -53,17 +57,20 @@ void FaceFinder::addImage(const int _frameNumber, void* inputVideoBuffer, const 
     //значение maxSizeInBytes нужно выставить на 24*2=48 как минимум. Если выставить от 24 до 48, то найдется только одно лицо. 
     //Если меньше 24 - то не найдет ни одного
     //Кстати, это можно обработать, потому что если он не вернет лиц из-за недостаточного значения, то код ошибки будет FSDKE_INSUFFICIENT_BUFFER_SIZE(-8)
-    result = FSDK_DetectMultipleFaces(*image.get(), &facesCount, facePositionPointer.get(), sizeof(TFacePosition) * MAX_FACE_COUNT);
+    result = FSDK_DetectMultipleFaces(image, &facesCount, facePositionPointer.get(), sizeof(TFacePosition) * MAX_FACE_COUNT);
     if (result == FSDKE_FACE_NOT_FOUND) {
-        saveNotFound(_frameNumber, image.get());
+        saveNotFound(_frameNumber, image);
     }
-    CHECK_IF_FALSE(result == FSDKE_OK, );
-    CHECK_IF_FALSE(facesCount != 0, );
-
+    if (facesCount == 0) {
+        FSDK_FreeImage(image);
+        return;
+    }
+    
     TFacePosition* facePositionArray = facePositionPointer.get();
     for (int i = 0; i < facesCount; i++) {
         std::shared_ptr<FSDK_FaceTemplate> faceTemplate(new FSDK_FaceTemplate);
-        result = FSDK_GetFaceTemplateInRegion(*image, &facePositionArray[i], faceTemplate.get());
+        auto fpa = &facePositionArray[i];
+        result = FSDK_GetFaceTemplateInRegion(image, fpa, faceTemplate.get());
         CHECK_IF_FALSE_CONTINUE(result == FSDKE_OK, "Cannot get face template, error code " << result);
 
         bool createNewFaceDesription = true;
@@ -94,13 +101,13 @@ void FaceFinder::addImage(const int _frameNumber, void* inputVideoBuffer, const 
                 CopyMemory(tmpDesc->faceTemplate, faceTemplate.get(), sizeof(FSDK_FaceTemplate));
             }
 
-            saveAlreadyFound(_frameNumber, image.get(), tmpDesc);
+            saveAlreadyFound(_frameNumber, image, tmpDesc);
         }
 
         if (createNewFaceDesription) {
-            tempDescriptions.push_back(new FaceDescriptionTemp(_frameNumber, new TFacePosition(facePositionArray[i]), faceTemplate.get()));
+            tempDescriptions.push_back(new FaceDescriptionTemp(_frameNumber, new TFacePosition(facePositionArray[i]), new FSDK_FaceTemplate(*faceTemplate.get())));
 
-            saveFirstTime(_frameNumber, image.get());
+            saveFirstTime(_frameNumber, image);
         }
 
         /*
@@ -135,6 +142,7 @@ void FaceFinder::addImage(const int _frameNumber, void* inputVideoBuffer, const 
 
         descriptions.push_back(descriptionData);*/
     }
+    FSDK_FreeImage(image);
 }
 
 void FaceFinder::finish() {
@@ -222,34 +230,35 @@ void FaceFinder::clearAll() {
     clearTempDescriptions();
 }
 
-void FaceFinder::saveNotFound(const int frameNumber, HImage* image) {
-    return;
+void FaceFinder::saveNotFound(const int frameNumber, HImage image) {
+    cout << "Frame " << frameNumber << ": face is not found." << endl;
     const std::string not_found = PICTURES_DIRECTORY + "not_found\\";
     std::filesystem::create_directories(std::filesystem::path(not_found));
     std::string out = not_found + to_string(frameNumber) + ".bmp";
-    FSDK_SaveImageToFile(*image, out.c_str());
+    FSDK_SaveImageToFile(image, out.c_str());
 }
 
-void FaceFinder::saveFirstTime(const int frameNumber, HImage* image) {
-    return;
+void FaceFinder::saveFirstTime(const int frameNumber, HImage image) {
+    cout << "Frame " << frameNumber << ": new group is created." << endl;
     const std::string newDir = PICTURES_DIRECTORY + to_string(tempDescriptions.size()) + "\\";
     std::filesystem::create_directories(std::filesystem::path(newDir));
     std::string out = newDir + to_string(frameNumber) + ".bmp";
-    FSDK_SaveImageToFile(*image, out.c_str());
+    FSDK_SaveImageToFile(image, out.c_str());
 }
 
-void FaceFinder::saveAlreadyFound(const int frameNumber, HImage* image, FaceDescriptionTemp* tmpDesc) {
-    return;
+void FaceFinder::saveAlreadyFound(const int frameNumber, HImage image, FaceDescriptionTemp* tmpDesc) {
     int num = -1;
     for (int j = 0; j < tempDescriptions.size(); j++) {
         if (tmpDesc == tempDescriptions[j]) {
-            num = j;
+            num = j + 1;
             break;
         }
     }
+    cout << "Frame " << frameNumber << ": added to the existing group # " << num << endl;
     const std::string dir = PICTURES_DIRECTORY + to_string(num) + "\\";
     std::string out = dir + to_string(frameNumber) + ".bmp";
-    FSDK_SaveImageToFile(*image, out.c_str());
+    int result = FSDK_SaveImageToFile(image, out.c_str());
+    int qwe = 0;
 }
 
 
