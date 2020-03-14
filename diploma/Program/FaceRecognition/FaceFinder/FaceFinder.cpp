@@ -9,18 +9,30 @@
 /*************FaceFinder**************/
 /*************************************/
 
-const std::string FaceFinder::PICTURES_DIRECTORY = getPicturesDirectory();
+const std::string FaceFinder::PICTURES_HIGHT_DIRECTORY = getPicturesHightDirectory();
 
-std::string FaceFinder::getPicturesDirectory() {
+const std::string FaceFinder::PICTURES_LOW_DIRECTORY = getPicturesLowDirectory();
+
+
+std::string FaceFinder::getPicturesHightDirectory() {
     TCHAR currentDir[MAX_PATH];
     GetCurrentDirectory(MAX_PATH, currentDir);
-    return std::string(currentDir) + "\\pictures\\";
+    return std::string(currentDir) + "\\pictures\\hight\\";
 }
+
+
+std::string FaceFinder::getPicturesLowDirectory() {
+    TCHAR currentDir[MAX_PATH];
+    GetCurrentDirectory(MAX_PATH, currentDir);
+    return std::string(currentDir) + "\\pictures\\low\\";
+}
+
 
 const std::map<IFaceFinder::ColorDepth, FSDK_IMAGEMODE> FaceFinder::COLOR_DEPTH_CORRELATION  = { {ColorDepth::Bit8, FSDK_IMAGE_GRAYSCALE_8BIT},
                                                                                                  {ColorDepth::Bit24, FSDK_IMAGE_COLOR_24BIT}, 
                                                                                                  {ColorDepth::Bit32, FSDK_IMAGE_COLOR_32BIT} };
 const double FaceFinder::SIMILARITY_THRESHOLD = 0.75;
+const double FaceFinder::LOW_SIMILARITY_THRESHOLD = 0.6;
 const int FaceFinder::MAX_FACE_COUNT = 10;
 
 FaceFinder::FaceFinder() {
@@ -33,7 +45,8 @@ FaceFinder::~FaceFinder() {
 void FaceFinder::init() {
     cout << "FaceFinder initializing";
     clearAll();
-    std::filesystem::remove_all(std::filesystem::path(PICTURES_DIRECTORY));
+    std::filesystem::remove_all(std::filesystem::path(PICTURES_HIGHT_DIRECTORY));
+    std::filesystem::remove_all(std::filesystem::path(PICTURES_LOW_DIRECTORY));
 }
 
 
@@ -69,8 +82,7 @@ void FaceFinder::addImage(const int _frameNumber, void* inputVideoBuffer, const 
     TFacePosition* facePositionArray = facePositionPointer.get();
     for (int i = 0; i < facesCount; i++) {
         std::shared_ptr<FSDK_FaceTemplate> faceTemplate(new FSDK_FaceTemplate);
-        auto fpa = &facePositionArray[i];
-        result = FSDK_GetFaceTemplateInRegion(image, fpa, faceTemplate.get());
+        result = FSDK_GetFaceTemplateInRegion(image, &facePositionArray[i], faceTemplate.get());
         CHECK_IF_FALSE_CONTINUE(result == FSDKE_OK, "Cannot get face template, error code " << result);
 
         bool createNewFaceDesription = true;
@@ -148,12 +160,55 @@ void FaceFinder::addImage(const int _frameNumber, void* inputVideoBuffer, const 
 void FaceFinder::finish() {
     cout << "FaceFinder finalizing";
 
-    //std::vector<FaceDescriptionTemp*> roughtTempDescriptions;
-    //for (auto tmpDesc : tempDescriptions) {
-    //    for (auto tmpDesc2 : tempDescriptions) {
-    //        CHECK_IF_FALSE_CONTINUE_NO_MESSAGE(tmpDesc)
-    //    }
-    //}
+    int prevSize = (int)tempDescriptions.size();
+    std::vector<FaceDescriptionTemp*> toRemove;
+    auto notToRemove = [&toRemove](FaceDescriptionTemp* reg) -> bool {
+        return std::find(toRemove.begin(), toRemove.end(), reg) == toRemove.end();
+    };
+
+    for (auto tmpDesc : tempDescriptions) {
+        CHECK_IF_FALSE_CONTINUE_NO_MESSAGE(notToRemove(tmpDesc));
+        for (auto tmpDesc2 : tempDescriptions) {
+            CHECK_IF_FALSE_CONTINUE_NO_MESSAGE((*tmpDesc != *tmpDesc2));
+            CHECK_IF_FALSE_CONTINUE_NO_MESSAGE(notToRemove(tmpDesc2));
+
+            float similarity = 0.0;
+            /*int result = */FSDK_MatchFaces(tmpDesc->faceTemplate, tmpDesc2->faceTemplate, &similarity);
+            CHECK_IF_FALSE_CONTINUE_NO_MESSAGE((similarity >= LOW_SIMILARITY_THRESHOLD));
+
+            if (isNewFaceBetter(tmpDesc->faceTemplate, tmpDesc2->faceTemplate)) {
+                tmpDesc->bestFrame = tmpDesc2->bestFrame;
+                tmpDesc->facePosition = new TFacePosition(*tmpDesc2->facePosition);
+                CopyMemory(tmpDesc->faceTemplate, tmpDesc2->faceTemplate, sizeof(FSDK_FaceTemplate));
+            }
+            uniteRegions(tmpDesc->frameRegions, tmpDesc2->frameRegions);
+            toRemove.push_back(tmpDesc2);
+        }
+        int i = 0;
+    }
+
+    for (auto remEl : toRemove) {
+        tempDescriptions.erase(std::remove(tempDescriptions.begin(), tempDescriptions.end(), remEl), tempDescriptions.end());
+        delete remEl;
+    }
+    
+    std::filesystem::create_directories(std::filesystem::path(PICTURES_LOW_DIRECTORY));
+    std::filesystem::copy(filesystem::path(PICTURES_HIGHT_DIRECTORY + "not_found\\"), filesystem::path(PICTURES_LOW_DIRECTORY + "not_found\\"), filesystem::copy_options::recursive);
+    for (int index = 0; index < tempDescriptions.size(); index++) {
+        std::filesystem::create_directories(std::filesystem::path(PICTURES_LOW_DIRECTORY + to_string(index + 1) + "\\"));
+        for (auto reg : tempDescriptions[index]->frameRegions) {
+            for (int i = reg->start; i < reg->start + reg->duration; i++) {
+                for (int j = 1; j <= prevSize; j++) {
+                    string str = PICTURES_HIGHT_DIRECTORY + to_string(j) + "\\" + to_string(i) + ".bmp";
+                    if (filesystem::exists(filesystem::path(str))) {
+                        string newStr = PICTURES_LOW_DIRECTORY + to_string(index + 1) + "\\" + to_string(i) + ".bmp";
+                        filesystem::copy_file(str, newStr);
+                        break;
+                    }
+                }
+            }
+        }
+    }
 
 
     for (const auto& tmpDesc : tempDescriptions) {
@@ -211,6 +266,56 @@ bool FaceFinder::isNewFaceBetter(FSDK_FaceTemplate* currentFace, FSDK_FaceTempla
     return currentTemplateNorm < newTemplateNorm;
 }
 
+void FaceFinder::uniteRegions(std::vector<FrameRegion*>& current, std::vector<FrameRegion*> additional) {
+    std::vector<FrameRegion*> toRemove;
+    auto notToRemove = [&toRemove](FrameRegion* reg) -> bool {
+        return std::find(toRemove.begin(), toRemove.end(), reg) == toRemove.end();
+    };
+    for (auto currentReg : current) {
+        for (auto addReg : additional) {
+            CHECK_IF_FALSE_CONTINUE_NO_MESSAGE(notToRemove(addReg));
+            //CHECK_IF_FALSE_CONTINUE_NO_MESSAGE((std::find(toRemove.begin(), toRemove.end(), addReg) == toRemove.end()));
+
+            if (currentReg->intersect(addReg)) {
+                toRemove.push_back(addReg);
+                //additional.erase(std::remove(additional.begin(), additional.end(), addReg), additional.end());
+            }
+        }
+    }
+    for (auto remEl : toRemove) {
+        additional.erase(std::remove(additional.begin(), additional.end(), remEl), additional.end());
+    }
+    toRemove.clear();
+
+    for (auto currentReg : current) {
+        CHECK_IF_FALSE_CONTINUE_NO_MESSAGE(notToRemove(currentReg));
+        //CHECK_IF_FALSE_CONTINUE_NO_MESSAGE((std::find(toRemove.begin(), toRemove.end(), currentReg) == toRemove.end()));
+        for (auto currentReg2 : current) {
+            CHECK_IF_FALSE_CONTINUE_NO_MESSAGE((*currentReg != *currentReg2));
+            CHECK_IF_FALSE_CONTINUE_NO_MESSAGE(notToRemove(currentReg2));
+            //CHECK_IF_FALSE_CONTINUE_NO_MESSAGE((std::find(toRemove.begin(), toRemove.end(), currentReg2) == toRemove.end()));
+
+            if (currentReg->intersect(currentReg2)) {
+                toRemove.push_back(currentReg2);
+                //current.erase(std::remove(current.begin(), current.end(), currentReg2), current.end());
+            }
+        }
+    }
+
+    for (auto remEl : toRemove) {
+        current.erase(std::remove(current.begin(), current.end(), remEl), current.end());
+        delete remEl;
+    }
+
+    for (FrameRegion* leftReg : additional) {
+        current.push_back(new FrameRegion(*leftReg));
+    }
+    std::sort(std::begin(current), std::end(current), [](FrameRegion* a, FrameRegion* b) -> bool
+    {
+        return a->start < b->start;
+    });
+}
+
 void FaceFinder::clearDescriptions() {
     for (auto& desc : descriptions) {
         delete desc;
@@ -232,7 +337,7 @@ void FaceFinder::clearAll() {
 
 void FaceFinder::saveNotFound(const int frameNumber, HImage image) {
     cout << "Frame " << frameNumber << ": face is not found." << endl;
-    const std::string not_found = PICTURES_DIRECTORY + "not_found\\";
+    const std::string not_found = PICTURES_HIGHT_DIRECTORY + "not_found\\";
     std::filesystem::create_directories(std::filesystem::path(not_found));
     std::string out = not_found + to_string(frameNumber) + ".bmp";
     FSDK_SaveImageToFile(image, out.c_str());
@@ -240,7 +345,7 @@ void FaceFinder::saveNotFound(const int frameNumber, HImage image) {
 
 void FaceFinder::saveFirstTime(const int frameNumber, HImage image) {
     cout << "Frame " << frameNumber << ": new group is created." << endl;
-    const std::string newDir = PICTURES_DIRECTORY + to_string(tempDescriptions.size()) + "\\";
+    const std::string newDir = PICTURES_HIGHT_DIRECTORY + to_string(tempDescriptions.size()) + "\\";
     std::filesystem::create_directories(std::filesystem::path(newDir));
     std::string out = newDir + to_string(frameNumber) + ".bmp";
     FSDK_SaveImageToFile(image, out.c_str());
@@ -249,16 +354,15 @@ void FaceFinder::saveFirstTime(const int frameNumber, HImage image) {
 void FaceFinder::saveAlreadyFound(const int frameNumber, HImage image, FaceDescriptionTemp* tmpDesc) {
     int num = -1;
     for (int j = 0; j < tempDescriptions.size(); j++) {
-        if (tmpDesc == tempDescriptions[j]) {
+        if (*tmpDesc == *tempDescriptions[j]) {//
             num = j + 1;
             break;
         }
     }
     cout << "Frame " << frameNumber << ": added to the existing group # " << num << endl;
-    const std::string dir = PICTURES_DIRECTORY + to_string(num) + "\\";
+    const std::string dir = PICTURES_HIGHT_DIRECTORY + to_string(num) + "\\";
     std::string out = dir + to_string(frameNumber) + ".bmp";
-    int result = FSDK_SaveImageToFile(image, out.c_str());
-    int qwe = 0;
+    /*int result = */FSDK_SaveImageToFile(image, out.c_str());
 }
 
 
@@ -293,6 +397,35 @@ FaceFinder::FaceDescriptionTemp::~FaceDescriptionTemp() {
     }
     delete facePosition;
     delete faceTemplate;
+}
+
+bool FaceFinder::FaceDescriptionTemp::operator==(const FaceDescriptionTemp& other) const {
+    bool frameEquals = this->bestFrame == other.bestFrame;
+    CHECK_IF_FALSE(frameEquals, false);
+
+    bool regionRegions = this->frameRegions.size() == other.frameRegions.size();
+    CHECK_IF_FALSE(regionRegions, false);
+
+    for (int i = 0; i < frameRegions.size(); i++) {
+        regionRegions = regionRegions && this->frameRegions[i] == other.frameRegions[i];
+    }
+    CHECK_IF_FALSE(regionRegions, false);
+
+    bool facePosition = this->facePosition->xc == other.facePosition->xc &&
+                        this->facePosition->yc == other.facePosition->yc &&
+                        this->facePosition->w == other.facePosition->w &&
+                        this->facePosition->angle == other.facePosition->angle &&
+                        this->facePosition->padding == other.facePosition->padding;
+    CHECK_IF_FALSE(facePosition, false);
+
+    int diff = std::strcmp(this->faceTemplate->ftemplate, other.faceTemplate->ftemplate);
+    CHECK_IF_FALSE(diff == 0, false);
+
+    return true;
+}
+
+bool FaceFinder::FaceDescriptionTemp::operator!=(const FaceDescriptionTemp& other) const {
+    return !(*this == other);
 }
 
 void FaceFinder::FaceDescriptionTemp::clear() {

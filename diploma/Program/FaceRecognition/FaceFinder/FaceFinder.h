@@ -42,9 +42,6 @@ public:
     //Наш конструктор, который перегружает конструктор интерфейса
     FaceFinder();
 
-
-
-
     //Нам нужно хранить мапу, у которой ключом будет индекс, а значением пара, с первым значением FaceDescription, а вторым - лист FrameRegion'ов, где он содержится
     //То есть выглядеть это будет как-то так:
     //std::map<int, std::pair<FaceDescription*, std::list<FrameRegion*> > >
@@ -78,6 +75,9 @@ private:
         FaceDescriptionTemp& operator=(const FaceDescriptionTemp& other) = delete;
         FaceDescriptionTemp& operator=(FaceDescriptionTemp&& other) noexcept = delete;
 
+        bool operator==(const FaceDescriptionTemp& other) const;
+        bool operator!=(const FaceDescriptionTemp& other) const;
+
         void clear();
 
         int bestFrame;
@@ -87,6 +87,7 @@ private:
     };
 
     inline bool isNewFaceBetter(FSDK_FaceTemplate* currentFace, FSDK_FaceTemplate* newFace) const;
+    void uniteRegions(std::vector<FrameRegion*>& current, std::vector<FrameRegion*> additional);
     void clearDescriptions();
     void clearTempDescriptions();
     void clearAll();
@@ -102,11 +103,14 @@ private:
 
     static const std::map<ColorDepth, FSDK_IMAGEMODE> COLOR_DEPTH_CORRELATION;
     static const double SIMILARITY_THRESHOLD;
+    static const double LOW_SIMILARITY_THRESHOLD;
     static const int MAX_FACE_COUNT;
 
     //вспомогательные функции для записи файлов
-    static const std::string PICTURES_DIRECTORY;
-    static std::string getPicturesDirectory();
+    static const std::string PICTURES_HIGHT_DIRECTORY;
+    static const std::string PICTURES_LOW_DIRECTORY;
+    static std::string getPicturesHightDirectory();
+    static std::string getPicturesLowDirectory();
 };
 
 #endif // !_FACE_FINDER_
