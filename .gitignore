@@ -17,8 +17,7 @@
 [Dd]ebugPublic/
 [Rr]elease/
 [Rr]eleases/
-x64/
-x86/
+
 bld/
 [Bb]in/
 [Oo]bj/
@@ -290,5 +289,15 @@ __pycache__/
 # Directories I want to ignore
 diploma/projects/Diploma_first/Diploma_first/samples/Me
 
-diploma/Program/FaceRecognition/_debug_x32
-diploma/Program/FaceRecognition/_debug_x64
+
+*pictures*
+*_Debug_Win32*
+*_Debug_x64*
+diploma/Program/FaceRecognition/Application/Win32/_Debug
+diploma/Program/FaceRecognition/Application/Win32/_Release
+diploma/Program/FaceRecognition/FaceRecognitionStaticLib/Win32/_Debug
+diploma/Program/FaceRecognition/FaceRecognitionStaticLib/Win32/_Release
+diploma/Program/FaceRecognition/Application/x64/_Debug
+diploma/Program/FaceRecognition/Application/x64/_Release
+diploma/Program/FaceRecognition/FaceRecognitionStaticLib/x64/_Debug
+diploma/Program/FaceRecognition/FaceRecognitionStaticLib/x64/_Release
