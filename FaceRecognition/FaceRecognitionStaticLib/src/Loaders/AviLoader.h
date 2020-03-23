@@ -31,7 +31,6 @@ public:
 
 
     int getSkanLine() const override;
-    int getFrameNumber() const override;
     int getPictureWidth() const override;
     int getPictureHeight() const override;
     int getLastReadFrameNumber() const override;

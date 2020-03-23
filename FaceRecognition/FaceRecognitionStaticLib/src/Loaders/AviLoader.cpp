@@ -92,10 +92,6 @@ int AviLoader::getSkanLine() const {
     return scanLine;
 }
 
-int AviLoader::getFrameNumber() const {
-    return frameNum;
-}
-
 int AviLoader::getPictureWidth() const {
     return bmpInfoOut.bmiHeader.biWidth;
 }

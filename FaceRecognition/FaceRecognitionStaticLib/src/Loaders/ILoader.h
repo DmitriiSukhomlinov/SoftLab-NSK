@@ -18,7 +18,6 @@ public:
     virtual void finish() = 0;
 
     virtual int getSkanLine() const = 0;
-    virtual int getFrameNumber() const = 0;
     virtual int getPictureWidth() const = 0;
     virtual int getPictureHeight() const = 0;
     virtual int getLastReadFrameNumber() const = 0;
