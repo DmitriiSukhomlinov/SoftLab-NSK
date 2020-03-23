@@ -24,15 +24,12 @@
     <ClCompile Include="src\Loaders\AviLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Loaders\IAviLoader.cpp">
+    <ClCompile Include="src\Loaders\ILoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Loaders\AviLoader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Loaders\IAviLoader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Utils\Check.h">
@@ -57,6 +54,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\FaceFinder\IFaceFinder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Loaders\ILoader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

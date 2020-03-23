@@ -1,7 +1,7 @@
 #ifndef _AVI_LOADER_
 #define _AVI_LOADER_
 
-#include "IAviLoader.h"
+#include "ILoader.h"
 
 #include "atlcomcli.h"
 #include "Vfw.h"

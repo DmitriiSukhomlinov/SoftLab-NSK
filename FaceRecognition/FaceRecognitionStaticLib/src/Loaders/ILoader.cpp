@@ -1,4 +1,4 @@
-#include "IAviLoader.h"
+#include "ILoader.h"
 #include "AviLoader.h"
 
 ILoader* ILoader::createLoader() {

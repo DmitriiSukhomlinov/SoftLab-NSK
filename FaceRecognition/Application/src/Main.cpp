@@ -4,7 +4,7 @@
 
 #include "FaceSDK/LuxandFaceSDK.h"
 #include "FaceFinder/IFaceFinder.h"
-#include "Loaders/IAviLoader.h"
+#include "Loaders/ILoader.h"
 #include "Utils/Check.h"
 #include "Utils/Consts.h"
 

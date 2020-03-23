@@ -183,7 +183,7 @@
     <ClCompile Include="src\FaceFinder\FaceFinder.cpp" />
     <ClCompile Include="src\FaceFinder\IFaceFinder.cpp" />
     <ClCompile Include="src\Loaders\AviLoader.cpp" />
-    <ClCompile Include="src\Loaders\IAviLoader.cpp" />
+    <ClCompile Include="src\Loaders\ILoader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\FaceFinder\FaceDescription.h" />
@@ -193,7 +193,7 @@
     <ClInclude Include="src\FaceSDK\LuxandFaceSDK.h" />
     <ClInclude Include="src\GetAVIInfo\GetAVIInfo.h" />
     <ClInclude Include="src\Loaders\AviLoader.h" />
-    <ClInclude Include="src\Loaders\IAviLoader.h" />
+    <ClInclude Include="src\Loaders\ILoader.h" />
     <ClInclude Include="src\Utils\Check.h" />
     <ClInclude Include="src\Utils\Consts.h" />
   </ItemGroup>
