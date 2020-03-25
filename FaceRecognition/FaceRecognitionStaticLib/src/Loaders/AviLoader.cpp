@@ -5,7 +5,8 @@
 AviLoader::AviLoader() : avi(nullptr), totalFrames(0), decodedImage(nullptr), decodedImageSize(0), bmpInfoIn(nullptr), scanLine(0), frameNum(-1) {}
 
 AviLoader::~AviLoader() {
-
+    delete bmpInfoIn;
+    delete decodedImage;
 }
 
 void AviLoader::init() {
@@ -41,6 +42,7 @@ void AviLoader::loadFile(const std::string& path) {
     bmpInfoOut.bmiHeader.biPlanes = bmpInfoIn->bmiHeader.biPlanes;
     bmpInfoOut.bmiHeader.biBitCount = bmpInfoIn->bmiHeader.biBitCount;
 
+    AVIStreamHeader streamHeader;
     hres = avi->GetVideoStreamInfo(0, (unsigned char*)&streamHeader, sizeof(streamHeader), &tmp, NULL, NULL);
     CHECK_IF_FALSE_RETURN(hres == S_OK, "Video stream info was got correctly.", "Video stream info getting error.", );
 

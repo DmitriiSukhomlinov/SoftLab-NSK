@@ -44,7 +44,6 @@ private:
     int totalFrames;
     BITMAPINFO* bmpInfoIn;
     BITMAPINFO bmpInfoOut;
-    AVIStreamHeader streamHeader;
     int decodedImageSize;
     unsigned char* decodedImage;
     int scanLine;
