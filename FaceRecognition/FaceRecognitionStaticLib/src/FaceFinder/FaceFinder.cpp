@@ -32,7 +32,7 @@ const std::map<IFaceFinder::ColorDepth, FSDK_IMAGEMODE> FaceFinder::COLOR_DEPTH_
                                                                                                  {ColorDepth::Bit24, FSDK_IMAGE_COLOR_24BIT}, 
                                                                                                  {ColorDepth::Bit32, FSDK_IMAGE_COLOR_32BIT} };
 const double FaceFinder::SIMILARITY_THRESHOLD = 0.75;
-const double FaceFinder::LOW_SIMILARITY_THRESHOLD = 0.6;
+const double FaceFinder::LOW_SIMILARITY_THRESHOLD = 0.75;
 const int FaceFinder::MAX_FACE_COUNT = 10;
 
 FaceFinder::FaceFinder() {
@@ -241,14 +241,14 @@ int FaceFinder::faceCount() const {
 FaceDescription* FaceFinder::getFaceInfo(int index) const {
     CHECK_IF_FALSE((index < descriptions.size()), nullptr);
 
-    std::cout << "Index № " << index << " for the \"getFaceInfo\" function was found.";
+    //std::cout << "Index № " << index << " for the \"getFaceInfo\" function was found.";
     return descriptions.at(index)->faceDescrition;
 }
 
 int FaceFinder::frameRegionsNum(int index) const {
     CHECK_IF_FALSE((index < descriptions.size()), -1);
 
-    std::cout << "Index № " << index << " for the \"frameRegionsNum\" function was found.";
+    //std::cout << "Index № " << index << " for the \"frameRegionsNum\" function was found.";
     return int(descriptions.at(index)->frameRegions.size());
 }
 
@@ -256,8 +256,8 @@ FrameRegion* FaceFinder::getFaceRegionByIndex(int index, int frameNum) const {
     CHECK_IF_FALSE((index < descriptions.size()), nullptr);
     CHECK_IF_FALSE((0 <= frameNum) && (frameNum < descriptions.at(frameNum)->frameRegions.size()), nullptr);
 
-    std::cout << "Index № " << index << " for the \"getFaceRegionByIndex\" function was found.";
-    return descriptions.at(frameNum)->frameRegions.at(frameNum);
+    //std::cout << "Index № " << index << " for the \"getFaceRegionByIndex\" function was found.";
+    return descriptions.at(index)->frameRegions.at(frameNum);
 }
 
 bool FaceFinder::isNewFaceBetter(FSDK_FaceTemplate* currentFace, FSDK_FaceTemplate* newFace) const {
