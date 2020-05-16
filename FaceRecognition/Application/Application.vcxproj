@@ -163,10 +163,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\Main.cpp" />
-    <ClCompile Include="src\sqlite\sqlite3.c" />
+    <ClCompile Include="src\SQLWorker\sqlite\sqlite3.c" />
+    <ClCompile Include="src\SQLWorker\SQLWorker.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\sqlite\sqlite3.h" />
+    <ClInclude Include="src\SQLWorker\sqlite\sqlite3.h" />
+    <ClInclude Include="src\SQLWorker\SQLWorker.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

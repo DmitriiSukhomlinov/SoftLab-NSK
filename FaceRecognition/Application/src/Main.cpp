@@ -8,120 +8,76 @@
 #include "Utils/Check.h"
 #include "Utils/Consts.h"
 
-#include <thread>         // std::this_thread::sleep_for
-#include <chrono>
-
+#include <iostream>     // std::cout, std::ostream, std::ios
+#include <fstream>  
 #include <string>
+#include <vector>
+#include <unordered_map>
 
 #include "assert.h"
 
-#include "sqlite/sqlite3.h"
+#include "SQLWorker/sqlite/sqlite3.h"
 
-//unsigned char* readBmp(const std::string& path, BITMAPINFOHEADER& bmpInfo) {
-//    FILE* bmp = fopen(path.c_str(), "rb");//Открываем файл для чтения побитово, НАДО УБРАТЬ ВОРНИНГ!!!
-//
-//    BITMAPFILEHEADER bmpHeader;
-//    fread(&bmpHeader, 1, sizeof(BITMAPFILEHEADER), bmp);//Считываем FILEHEADER
-//    fread(&bmpInfo, 1, sizeof(BITMAPINFOHEADER), bmp);//Считываем INFOHEADER
-//    try//Обработка исключения
-//    {
-//        if ((bmpHeader.bfType != 0x4D42) || (bmpInfo.biBitCount != 24))//Проверка сигнатуры и глубины цвета
-//        {
-//            throw "Файл должен быть 24-х битным .bmp";
-//        }
-//    } catch (const char* )//Если файл не того формата - выкидываем исключение...
-//    {
-//        return nullptr;
-//    }
-//    //const long int dataSize = long int(bmpInfo.biHeight) * bmpInfo.biWidth * 3;
-//    //const int scanLine = ((bmpInfo.biWidth * 32 + 31) & ~31) / 8 * 3;
-//    const int byteWidth = bmpInfo.biWidth * 3;
-//    const int additionalPixelsTwo = (byteWidth) % 4 == 0 ? 0 : 4 - (byteWidth) % 4;
-//    const int scanLine = byteWidth + additionalPixelsTwo;
-//    const long int dataSize = long int(bmpInfo.biHeight) * scanLine;
-//    unsigned char* data = new unsigned char[dataSize];//Создаем массив для данных о растре
-//    fseek(bmp, bmpHeader.bfOffBits, SEEK_SET);//Перемещаем указатель в потоке на то место, где начинается инфа оо RGB (Ну так, на всякий случай)
-//    fread(data, 1, dataSize, bmp);//Данные прочитаны
-//    fclose(bmp);//Закрываем файл, больше он нам ни к чему
-//
-//    unsigned char* invertedData = new unsigned char[dataSize];
-//    for (int i = 0; i < bmpInfo.biHeight; i++) {
-//        for (int j = 0; j < byteWidth; j = j + 3) {
-//            invertedData[i * scanLine + j] = data[(bmpInfo.biHeight - 1 - i) * scanLine + j + 2];
-//            invertedData[i * scanLine + j + 1] = data[(bmpInfo.biHeight - 1 - i) * scanLine + j + 1];
-//            invertedData[i * scanLine + j + 2] = data[(bmpInfo.biHeight - 1 - i) * scanLine + j];
-//        }
-//    }
-//    delete[]data;
-//    return invertedData;
-//}
+#include "SQLWorker/SQLWorker.h"
 
-const char* createSql = "CREATE TABLE IF NOT EXISTS Faces(\"index\" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, \"face_description\" BLOB, \"regions\" STRING);";
+int readBmp(const std::string& path, unsigned char*& data, int& width, int& height, int& scanLine) {
+    FILE* bmp = fopen(path.c_str(), "rb");//Открываем файл для чтения побитово, НАДО УБРАТЬ ВОРНИНГ!!!
 
-int writeToSql(IFaceFinder* faceFinder) {
-    sqlite3* db = nullptr;
-    int result = sqlite3_open("my_database.dblite", &db);
-    CHECK_IF_FALSE_RETURN(result == SQLITE_OK, "Databse was created", sqlite3_errmsg(db), 1);
-
-    char* err = nullptr;
-    result = sqlite3_exec(db, createSql, 0, 0, &err);
-    CHECK_IF_FALSE_RETURN(result == SQLITE_OK, "Databse processed good", err, 1);
-    for (int i = 0; i < faceFinder->faceCount(); i++) {
-        FaceDescription* desc = faceFinder->getFaceInfo(i);
-        assert(desc != nullptr);
-
-        const int descSize = sizeof(desc->header) + desc->header.faceTemplateSize;
-        char* data = new char[descSize];
-        CopyMemory(data, desc, descSize);
-        std::string strData;
-        for (int j = 0; j < descSize; j++) {
-            strData += data[j];
+    BITMAPFILEHEADER bmpHeader;
+    BITMAPINFOHEADER bmpInfo;
+    fread(&bmpHeader, 1, sizeof(BITMAPFILEHEADER), bmp);//Считываем FILEHEADER
+    fread(&bmpInfo, 1, sizeof(BITMAPINFOHEADER), bmp);//Считываем INFOHEADER
+    try//Обработка исключения
+    {
+        if ((bmpHeader.bfType != 0x4D42) || (bmpInfo.biBitCount != 24))//Проверка сигнатуры и глубины цвета
+        {
+            throw "Файл должен быть 24-х битным .bmp";
         }
-        delete data;
-
-        std::string regions;
-        for (int j = 0; j < faceFinder->frameRegionsNum(i); j++) {
-            FrameRegion* reg = faceFinder->getFaceRegionByIndex(i, j);
-            assert(reg != nullptr);
-
-            regions += std::to_string(reg->start) + "," + std::to_string(reg->duration) + ";";
-        }
-
-        sqlite3_stmt* stmt = NULL;
-        std::string insertSql = "INSERT INTO Faces(\"index\", \"face_description\", \"regions\") VALUES(NULL, ?, \"" + regions + "\");";
-        result = sqlite3_prepare_v2(db, insertSql.c_str(), -1, &stmt, NULL);
-        CHECK_IF_FALSE_RETURN(result == SQLITE_OK, "Databse prepared good", "prepare failed: " << sqlite3_errmsg(db), 1);
-
-        result = sqlite3_bind_blob(stmt, 1, strData.c_str(), descSize, SQLITE_STATIC);
-        CHECK_IF_FALSE_RETURN(result == SQLITE_OK, "Databse bind blob is good", "prepare failed: " << sqlite3_errmsg(db), 1);
-
-        result = sqlite3_step(stmt);
-        CHECK_IF_FALSE_RETURN(result == SQLITE_DONE, "Databse executed good", "execution failed: " << sqlite3_errmsg(db), 1);
-
-        sqlite3_finalize(stmt);
+    } catch (const char* )//Если файл не того формата - выкидываем исключение...
+    {
+        return 1;
     }
+    //const long int dataSize = long int(bmpInfo.biHeight) * bmpInfo.biWidth * 3;
+    //const int scanLine = ((bmpInfo.biWidth * 32 + 31) & ~31) / 8 * 3;
+    width = bmpInfo.biWidth;
+    height = bmpInfo.biHeight;
+    const int byteWidth = width * 3;
+    const int additionalPixelsTwo = (byteWidth) % 4 == 0 ? 0 : 4 - (byteWidth) % 4;
+    scanLine = byteWidth + additionalPixelsTwo;
+    const long int dataSize = long int(height) * scanLine;
+    data = new unsigned char[dataSize];//Создаем массив для данных о растре
+    fseek(bmp, bmpHeader.bfOffBits, SEEK_SET);//Перемещаем указатель в потоке на то место, где начинается инфа оо RGB (Ну так, на всякий случай)
+    fread(data, 1, dataSize, bmp);//Данные прочитаны
+    fclose(bmp);//Закрываем файл, больше он нам ни к чему
 
-    sqlite3_close(db);
-
+    unsigned char* invertedData = new unsigned char[dataSize];
+    for (int i = 0; i < height; i++) {
+        for (int j = 0; j < byteWidth; j = j + 3) {
+            invertedData[i * scanLine + j] = data[(height - 1 - i) * scanLine + j + 2];
+            invertedData[i * scanLine + j + 1] = data[(height - 1 - i) * scanLine + j + 1];
+            invertedData[i * scanLine + j + 2] = data[(height - 1 - i) * scanLine + j];
+        }
+    }
+    delete[]data;
+    data = invertedData;
     return 0;
 }
 
-int main() {
-    //InsertFile("my_cosy_database.dblite");
-
+int updateDb(const std::string& path, const double firstThreshold, const double secondThreshold, const int frameMultiplicator) {
     int result = FSDK_ActivateLibrary(key);
     CHECK_IF_FALSE_RETURN(result == FSDKE_OK, "Correct key", "Activation error", 1);
 
     result = FSDK_Initialize(dllPath);
     CHECK_IF_FALSE_RETURN(result == FSDKE_OK, "Correct initialization of the dll", "Initialization error", 1);
 
-    ILoader* loader = ILoader::createLoader();
-    IFaceFinder* faceFinder = IFaceFinder::createFaceFinder();/////
+    std::shared_ptr<ILoader> loader(ILoader::createLoader());
+    std::shared_ptr<IFaceFinder> faceFinder(IFaceFinder::createFaceFinder());
+    std::shared_ptr<SQLWorker> sqlWorker(new SQLWorker());
 
     loader->init();
-    faceFinder->init();
+    faceFinder->init(firstThreshold, secondThreshold);
 
-    loader->loadFile("C:/Users/sukho/OneDrive/Desktop/GetAVIInfo/faces2.avi");
+    loader->loadFile(path.c_str());
 
     const int width = loader->getPictureWidth();
     const int height = loader->getPictureHeight();
@@ -132,8 +88,9 @@ int main() {
         CHECK_IF_FALSE_CONTINUE_NO_MESSAGE((nullptr != data));
 
         int curentDataFrameNumber = loader->getLastReadFrameNumber();
-        if (curentDataFrameNumber % 100 != 0) {
-            //continue;
+        if (curentDataFrameNumber % frameMultiplicator != 0) {
+            delete[] data;
+            continue;
         }
         faceFinder->addImage(curentDataFrameNumber, data, width, height, scanLine, IFaceFinder::ColorDepth::Bit24);
 
@@ -142,13 +99,92 @@ int main() {
     loader->finish();
     faceFinder->finish();
 
-    writeToSql(faceFinder);
+    //FaceDescription* desc = faceFinder->getFaceInfo(5);
+    //auto res = sqlWorker->getFacesFromDb(desc, 0.65);
 
-    delete loader;
-    delete faceFinder;
-  
+    sqlWorker->writeToSql(faceFinder.get(), path);
+
     result = FSDK_Finalize();
     CHECK_IF_FALSE_RETURN(result == FSDKE_OK, "Correct finalazing of the dll", "Incorect finalazing... Well... Ok))", 1);
 
     return 0;
+}
+
+int main(int argc, char* argv[]) {
+    CHECK_IF_FALSE_RETURN_NO_OK_MESSAGE((argc > 1), "No arguments, --help to open help", 1);
+    if (std::string(argv[1]) == "--help") {
+        std::cout
+            << "--update path_to_video first_treshold second_treshold [check each 'frame number'] - to update database with a new video;" << endl
+            << "--find path_to_picture treshold - to find a person from the picture in the database.";
+        return 0;
+    } else if (std::string(argv[1]) == "--update") {
+        //--update C:/Users/sukho/OneDrive/Desktop/GetAVIInfo/faces2.avi 0.9 0.75
+        CHECK_IF_FALSE_RETURN_NO_OK_MESSAGE((argc == 5 || argc == 6), "Unexpected arguments", 1);
+        const std::string pathToVideo = std::string(argv[2]);
+        const double firstThreshold = atof(argv[3]);
+        const double secondThreshold = atof(argv[4]);
+        CHECK_IF_FALSE_RETURN_NO_OK_MESSAGE((firstThreshold >= secondThreshold), "Unexpected thresholds, the first must be higher then the second", 1);
+
+        const int frameMultiplicator = argc == 6 ? atoi(argv[5]) : 1;
+        return updateDb(pathToVideo, firstThreshold, secondThreshold, frameMultiplicator);
+    } else if (std::string(argv[1]) == "--find") {
+        CHECK_IF_FALSE_RETURN_NO_OK_MESSAGE((argc == 4), "Unexpected arguments", 1);
+        const std::string pathToPicture = std::string(argv[2]);
+        const double threshold = atof(argv[3]);
+        int width = -1;
+        int height = -1;
+        int scanLine = -1;
+        unsigned char* data = nullptr;
+        int result = readBmp(pathToPicture, data, width, height, scanLine);
+        CHECK_IF_FALSE_RETURN_NO_OK_MESSAGE(result == 0, "Incorrect input picture", 1);
+
+        result = FSDK_ActivateLibrary(key);
+        CHECK_IF_FALSE_RETURN(result == FSDKE_OK, "Correct key", "Activation error", 1);
+
+        result = FSDK_Initialize(dllPath);
+        CHECK_IF_FALSE_RETURN(result == FSDKE_OK, "Correct initialization of the dll", "Initialization error", 1);
+
+        HImage image;
+        result = FSDK_LoadImageFromBuffer(&image, data, width, height, scanLine, FSDK_IMAGEMODE::FSDK_IMAGE_COLOR_24BIT);//!
+        CHECK_IF_FALSE_RETURN(result == FSDKE_OK, "Image loaded from buffer corretly", "Error in the loading process, error code " << result, 1);
+        if (result != FSDKE_OK) {
+            FSDK_FreeImage(image);
+            cout << "Error in the loading process, error code " << result;
+            return 1;
+        }
+
+        int facesCount = 0;
+        shared_ptr<TFacePosition> facePositionPointer(new TFacePosition[10]);
+        result = FSDK_DetectMultipleFaces(image, &facesCount, facePositionPointer.get(), sizeof(TFacePosition) * 10);
+        if (facesCount == 0) {
+            FSDK_FreeImage(image);
+            cout << "No faces on picture" << result << endl;
+            return 0;
+        }else if (facesCount > 1) {
+            FSDK_FreeImage(image);
+            cout << "Too many faces on picture, please, separate into several pictures" << endl;
+            return 0;
+        }
+        cout << "The only face was found, correct" << endl;
+
+        TFacePosition* facePositionArray = facePositionPointer.get();
+        std::shared_ptr<FSDK_FaceTemplate> faceTemplate(new FSDK_FaceTemplate);
+        result = FSDK_GetFaceTemplateInRegion(image, &facePositionArray[0], faceTemplate.get());
+        CHECK_IF_FALSE_RETURN_NO_OK_MESSAGE(result == FSDKE_OK, "Cannot get face template, error code " << result, 1);
+        FSDK_FreeImage(image);
+
+        std::shared_ptr<SQLWorker> sqlWorker(new SQLWorker());
+        std::unordered_map<std::string, std::string> resMap = sqlWorker->getFacesFromDb(faceTemplate.get(), threshold);
+
+        std::filebuf fb;
+        fb.open("out.txt", std::ios::out);
+        std::ostream fout(&fb);
+        fout << "The resulted videos and frames:" << endl;
+        for (const auto& key : resMap) {
+            fout << key.first <<  endl;
+            fout << key.second <<  endl << endl;
+        }
+    } else {
+        CHECK_IF_FALSE_RETURN_NO_OK_MESSAGE(false, "Unexpected second argument", 1);
+    }
 }

@@ -22,7 +22,7 @@ public:
 
     //Анализ видео кадр за кадром
     //Функция, стартующая цикл, в котором будут обрабатываться картинка одна за одной
-    void init() override;
+    void init(const double firstThreshold, const double secondThreshold) override;
     //Доавляем картинку на обработку в цикле
     void addImage(const int frameNumber, void* _inputVideoBuffer, const int _xPictureSize, const int _yPictureSize, const int _scanLine, const ColorDepth _colorDepth) override;
     //void addImage(const int frameNumber, const std::string& path) override;
@@ -101,9 +101,11 @@ private:
     //С этим вектором идет работа во время добавления кадров
     std::vector<FaceDescriptionTemp*> tempDescriptions;
 
+    double hightSimilarityThreshold;
+    double lowSimilarityThreshold;
+
+
     static const std::map<ColorDepth, FSDK_IMAGEMODE> COLOR_DEPTH_CORRELATION;
-    static const double SIMILARITY_THRESHOLD;
-    static const double LOW_SIMILARITY_THRESHOLD;
     static const int MAX_FACE_COUNT;
 
     //вспомогательные функции для записи файлов

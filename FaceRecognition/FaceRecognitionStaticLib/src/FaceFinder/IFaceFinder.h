@@ -29,7 +29,7 @@ public:
 
     //Анализ видео кадр за кадром
     //Инициализируем начало обработки видео
-    virtual void init() = 0;
+    virtual void init(const double firstThreshold, const double secondThreshold) = 0;
     //Добавляем картинку - буфер данных, размер, scanLine и глубину цвета
     //Эта функция должна вызываться в цикле
     virtual void addImage(const int frameNumber, void* _inputVideoBuffer, const int _xPictureSize, const int _yPictureSize, const int _scanLine, const ColorDepth _colorDepth) = 0;

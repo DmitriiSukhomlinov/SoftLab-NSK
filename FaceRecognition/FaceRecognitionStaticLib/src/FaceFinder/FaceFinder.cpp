@@ -31,18 +31,19 @@ std::string FaceFinder::getPicturesLowDirectory() {
 const std::map<IFaceFinder::ColorDepth, FSDK_IMAGEMODE> FaceFinder::COLOR_DEPTH_CORRELATION  = { {ColorDepth::Bit8, FSDK_IMAGE_GRAYSCALE_8BIT},
                                                                                                  {ColorDepth::Bit24, FSDK_IMAGE_COLOR_24BIT}, 
                                                                                                  {ColorDepth::Bit32, FSDK_IMAGE_COLOR_32BIT} };
-const double FaceFinder::SIMILARITY_THRESHOLD = 0.75;
-const double FaceFinder::LOW_SIMILARITY_THRESHOLD = 0.75;
 const int FaceFinder::MAX_FACE_COUNT = 10;
 
-FaceFinder::FaceFinder() {
-}
+FaceFinder::FaceFinder() : 
+    hightSimilarityThreshold(0.0), 
+    lowSimilarityThreshold(0.0) {}
 
 FaceFinder::~FaceFinder() {
     clearAll();
 }
 
-void FaceFinder::init() {
+void FaceFinder::init(const double firstThreshold, const double secondThreshold) {
+    hightSimilarityThreshold = firstThreshold;
+    lowSimilarityThreshold = secondThreshold;
     cout << "FaceFinder initializing";
     clearAll();
     std::filesystem::remove_all(std::filesystem::path(PICTURES_HIGHT_DIRECTORY));
@@ -89,7 +90,7 @@ void FaceFinder::addImage(const int _frameNumber, void* inputVideoBuffer, const 
         for (auto& tmpDesc : tempDescriptions) {
             float similarity = 0.0;
             result = FSDK_MatchFaces(faceTemplate.get(), tmpDesc->faceTemplate, &similarity);
-            CHECK_IF_FALSE_CONTINUE_NO_MESSAGE((similarity >= SIMILARITY_THRESHOLD));
+            CHECK_IF_FALSE_CONTINUE_NO_MESSAGE((similarity >= hightSimilarityThreshold));
 
             createNewFaceDesription = false;
             bool addToExistRegion = false;
@@ -121,38 +122,6 @@ void FaceFinder::addImage(const int _frameNumber, void* inputVideoBuffer, const 
 
             saveFirstTime(_frameNumber, image);
         }
-
-        /*
-        //Проверим если уже есть в массиве
-        for (auto& v : descriptions) {
-            //Вот тут у меня возникает закономерный вопрос - какием образом мне здесь провернуть операцию присваивания, чтобы в FSDK_FaceTemplate поместить то, что у нас сохранено?
-            FSDK_FaceTemplate* temp = reinterpret_cast<FSDK_FaceTemplate*>(v->faceDescrition->faceTemplate);
-            float similarity = 0.0;
-            result = FSDK_MatchFaces(faceTemplate, temp, &similarity);
-            CHECK_IF_FALSE_CONTINUE_NO_MESSAGE((similarity >= SIMILARITY_THRESHOLD));
-
-            for (FrameRegion* frame : v->frameRegions) {
-                CHECK_IF_FALSE_CONTINUE_NO_MESSAGE((frame->start + frame->duration == _frameNumber));
-                frame->duration++;
-            }
-
-            FrameRegion* newFrame = new FrameRegion(_frameNumber);
-            v->frameRegions.push_back(newFrame);
-
-            // выбрать лучшее лицо
-            if (isNewFaceBetter()) {
-                fillFaceDescription(v->faceDescrition, _frameNumber, facePositionArray[i].xc, facePositionArray[i].yc, facePositionArray[i].w, 0, (int)sizeof(*faceTemplate));
-                CopyMemory(v->faceDescrition->faceTemplate, faceTemplate, sizeof(FSDK_FaceTemplate));
-            }
-            return;
-        }
-        FaceDescription* faceDescription = createFaceDescription((int)sizeof(FSDK_FaceTemplate));
-        fillFaceDescription(faceDescription, _frameNumber, facePositionArray[i].xc, facePositionArray[i].yc, facePositionArray[i].w, 0, (int)sizeof(*faceTemplate));
-        CopyMemory(faceDescription->faceTemplate, faceTemplate, sizeof(FSDK_FaceTemplate));
-        FrameRegion* frame = new FrameRegion(_frameNumber);
-        DescriptionData* descriptionData = new DescriptionData(faceDescription, std::vector<FrameRegion*>() = { frame });
-
-        descriptions.push_back(descriptionData);*/
     }
     FSDK_FreeImage(image);
 }
@@ -174,7 +143,7 @@ void FaceFinder::finish() {
 
             float similarity = 0.0;
             /*int result = */FSDK_MatchFaces(tmpDesc->faceTemplate, tmpDesc2->faceTemplate, &similarity);
-            CHECK_IF_FALSE_CONTINUE_NO_MESSAGE((similarity >= LOW_SIMILARITY_THRESHOLD));
+            CHECK_IF_FALSE_CONTINUE_NO_MESSAGE((similarity >= lowSimilarityThreshold));
 
             if (isNewFaceBetter(tmpDesc->faceTemplate, tmpDesc2->faceTemplate)) {
                 tmpDesc->bestFrame = tmpDesc2->bestFrame;
