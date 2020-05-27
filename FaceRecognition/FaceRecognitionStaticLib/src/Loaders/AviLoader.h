@@ -34,6 +34,7 @@ public:
     int getPictureWidth() const override;
     int getPictureHeight() const override;
     int getLastReadFrameNumber() const override;
+    int getFramesNumber() const override;
     bool hasFrameToRead() const override;
 
 private:

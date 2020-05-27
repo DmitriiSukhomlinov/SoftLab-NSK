@@ -70,9 +70,14 @@ int updateDb(const std::string& path, const double firstThreshold, const double 
     result = FSDK_Initialize(dllPath);
     CHECK_IF_FALSE_RETURN(result == FSDKE_OK, "Correct initialization of the dll", "Initialization error", 1);
 
+    std::shared_ptr<SQLWorker> sqlWorker(new SQLWorker());
+    if (sqlWorker->isDatabaseContainsVideo(path)) {
+        std::cout << "The video is already presented in DB";
+        return 0;
+    }
+
     std::shared_ptr<ILoader> loader(ILoader::createLoader());
     std::shared_ptr<IFaceFinder> faceFinder(IFaceFinder::createFaceFinder());
-    std::shared_ptr<SQLWorker> sqlWorker(new SQLWorker());
 
     loader->init();
     faceFinder->init(firstThreshold, secondThreshold);
@@ -102,7 +107,13 @@ int updateDb(const std::string& path, const double firstThreshold, const double 
     //FaceDescription* desc = faceFinder->getFaceInfo(5);
     //auto res = sqlWorker->getFacesFromDb(desc, 0.65);
 
-    sqlWorker->writeToSql(faceFinder.get(), path);
+    result = sqlWorker->writeNewVideo(path, loader->getFramesNumber());
+    CHECK_IF_FALSE_RETURN(result == FSDKE_OK, "Correct Videos table error", "Videos table error", 1);
+
+    sqlWorker->writeFaceData(faceFinder.get());
+    CHECK_IF_FALSE_RETURN(result == FSDKE_OK, "Correct Regions and Faces creation", "Regions and Faces tables error", 1);
+
+    //sqlWorker->writeToSql(faceFinder.get(), path);
 
     result = FSDK_Finalize();
     CHECK_IF_FALSE_RETURN(result == FSDKE_OK, "Correct finalazing of the dll", "Incorect finalazing... Well... Ok))", 1);
@@ -119,6 +130,7 @@ int main(int argc, char* argv[]) {
         return 0;
     } else if (std::string(argv[1]) == "--update") {
         //--update C:/Users/sukho/OneDrive/Desktop/GetAVIInfo/faces2.avi 0.9 0.75
+        //--update "F:\softlab-nsk\Test videos\Putin and children questions.avi" 0.9 0.65 100
         CHECK_IF_FALSE_RETURN_NO_OK_MESSAGE((argc == 5 || argc == 6), "Unexpected arguments", 1);
         const std::string pathToVideo = std::string(argv[2]);
         const double firstThreshold = atof(argv[3]);
@@ -174,15 +186,17 @@ int main(int argc, char* argv[]) {
         FSDK_FreeImage(image);
 
         std::shared_ptr<SQLWorker> sqlWorker(new SQLWorker());
-        std::unordered_map<std::string, std::string> resMap = sqlWorker->getFacesFromDb(faceTemplate.get(), threshold);
+        auto resMap = sqlWorker->getFacesFromDb(faceTemplate.get(), threshold);
 
         std::filebuf fb;
         fb.open("out.txt", std::ios::out);
         std::ostream fout(&fb);
-        fout << "The resulted videos and frames:" << endl;
-        for (const auto& key : resMap) {
-            fout << key.first <<  endl;
-            fout << key.second <<  endl << endl;
+        int i = 1;
+        for (const auto& a : resMap) {
+            fout << std::to_string(i++) << "." << endl;
+            fout << "Similarity: " << std::to_string(a.first) << endl;
+            fout << "Video: " << a.second.first << endl;
+            fout << "Regions: " << a.second.second << endl << endl;
         }
     } else {
         CHECK_IF_FALSE_RETURN_NO_OK_MESSAGE(false, "Unexpected second argument", 1);

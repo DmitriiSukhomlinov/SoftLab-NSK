@@ -21,6 +21,7 @@ public:
     virtual int getPictureWidth() const = 0;
     virtual int getPictureHeight() const = 0;
     virtual int getLastReadFrameNumber() const = 0;
+    virtual int getFramesNumber() const = 0;
     virtual bool hasFrameToRead() const = 0;
 
 protected:

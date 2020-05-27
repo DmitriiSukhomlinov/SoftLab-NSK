@@ -162,7 +162,7 @@ void FaceFinder::finish() {
     }
     
     std::filesystem::create_directories(std::filesystem::path(PICTURES_LOW_DIRECTORY));
-    std::filesystem::copy(filesystem::path(PICTURES_HIGHT_DIRECTORY + "not_found\\"), filesystem::path(PICTURES_LOW_DIRECTORY + "not_found\\"), filesystem::copy_options::recursive);
+    //std::filesystem::copy(filesystem::path(PICTURES_HIGHT_DIRECTORY + "not_found\\"), filesystem::path(PICTURES_LOW_DIRECTORY + "not_found\\"), filesystem::copy_options::recursive);
     for (int index = 0; index < tempDescriptions.size(); index++) {
         std::filesystem::create_directories(std::filesystem::path(PICTURES_LOW_DIRECTORY + to_string(index + 1) + "\\"));
         for (auto reg : tempDescriptions[index]->frameRegions) {
@@ -171,7 +171,9 @@ void FaceFinder::finish() {
                     string str = PICTURES_HIGHT_DIRECTORY + to_string(j) + "\\" + to_string(i) + ".bmp";
                     if (filesystem::exists(filesystem::path(str))) {
                         string newStr = PICTURES_LOW_DIRECTORY + to_string(index + 1) + "\\" + to_string(i) + ".bmp";
-                        filesystem::copy_file(str, newStr);
+                        if (!filesystem::exists(newStr)) {
+                            filesystem::copy_file(str, newStr);
+                        }
                         break;
                     }
                 }

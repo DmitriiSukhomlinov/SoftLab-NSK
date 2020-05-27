@@ -106,6 +106,10 @@ int AviLoader::getLastReadFrameNumber() const {
     return frameNum;
 }
 
+int AviLoader::getFramesNumber() const {
+    return totalFrames;
+}
+
 bool AviLoader::hasFrameToRead() const {
     return frameNum != totalFrames - 1;
 }
@@ -124,49 +128,3 @@ unsigned char* AviLoader::invertPicture(unsigned char* old) {
     return invertedData;
 
 }
-
-//void AviLoader::checkReturn(const DWORD& res) const {
-//    if (res == ICERR_OK) {
-//        int i = 0;
-//    } else if (res == ICERR_DONTDRAW) {
-//        int i = 0;
-//    } else if (res == ICERR_NEWPALETTE) {
-//        int i = 0;
-//    } else if (res == ICERR_GOTOKEYFRAME) {
-//        int i = 0;
-//    } else if (res == ICERR_GOTOKEYFRAME) {
-//        int i = 0;
-//    } else if (res == ICERR_STOPDRAWING) {
-//        int i = 0;
-//    } else if (res == ICERR_UNSUPPORTED) {
-//        int i = 0;
-//    } else if (res == ICERR_BADFORMAT) {
-//        int i = 0;
-//    } else if (res == ICERR_MEMORY) {
-//        int i = 0;
-//    } else if (res == ICERR_INTERNAL) {
-//        int i = 0;
-//    } else if (res == ICERR_BADFLAGS) {
-//        int i = 0;
-//    } else if (res == ICERR_BADPARAM) {
-//        int i = 0;
-//    } else if (res == ICERR_BADSIZE) {
-//        int i = 0;
-//    } else if (res == ICERR_BADHANDLE) {
-//        int i = 0;
-//    } else if (res == ICERR_CANTUPDATE) {
-//        int i = 0;
-//    } else if (res == ICERR_ABORT) {
-//        int i = 0;
-//    } else if (res == ICERR_ERROR) {
-//        int i = 0;
-//    } else if (res == ICERR_BADBITDEPTH) {
-//        int i = 0;
-//    } else if (res == ICERR_BADIMAGESIZE) {
-//        int i = 0;
-//    } else if (res == ICERR_CUSTOM) {
-//        int i = 0;
-//    } else {
-//        int i = 0;
-//    }
-//}
