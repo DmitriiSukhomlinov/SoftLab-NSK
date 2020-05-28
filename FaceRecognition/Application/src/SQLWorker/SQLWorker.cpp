@@ -227,9 +227,9 @@ bool SQLWorker::isDatabaseContainsVideo(const std::string& path) const {
     //return std::find(allPaths.begin(), allPaths.end(), path) != allPaths.end();
 }
 
-std::map<double, std::pair<std::string, std::string>> SQLWorker::getFacesFromDb(FSDK_FaceTemplate* faceTemplate, const double threshold) {
+std::map<double, std::pair<std::string, std::string>, std::greater<double>> SQLWorker::getFacesFromDb(FSDK_FaceTemplate* faceTemplate, const double threshold) {
     auto regions = getRegionsTableFromDb();
-    std::map<double, std::pair<std::string, std::string>> result;
+    std::map<double, std::pair<std::string, std::string>, std::greater<double>> result;
     sqlite3* db = nullptr;
     int rc = sqlite3_open(SQLWorker::DB_NAME, &db);
     CHECK_IF_FALSE_RETURN_NO_OK_MESSAGE(rc == SQLITE_OK, sqlite3_errmsg(db), result);

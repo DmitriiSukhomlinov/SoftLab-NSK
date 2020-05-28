@@ -17,7 +17,7 @@ public:
 
     //int writeToSql(IFaceFinder* faceFinder, const std::string& pathToVideo);
     bool isDatabaseContainsVideo(const std::string& path) const;
-    std::map<double, std::pair<std::string, std::string>> getFacesFromDb(FSDK_FaceTemplate* faceTemplate, const double threshold);
+    std::map<double, std::pair<std::string, std::string>, std::greater<double>> getFacesFromDb(FSDK_FaceTemplate* faceTemplate, const double threshold);
 
     //struct FaceData {
     //    /*std::string path;
