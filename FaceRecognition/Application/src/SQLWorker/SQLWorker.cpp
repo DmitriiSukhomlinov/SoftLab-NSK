@@ -13,10 +13,8 @@
 const char* SQLWorker::DB_NAME = "my_database.dblite";
 
 const char* SQLWorker::CREATE_VIDEO_TABLE = "CREATE TABLE IF NOT EXISTS Videos(\"index\" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, \"frames_number\" INTEGER, \"path_to_a_video\" STRING);";
-const char* SQLWorker::CREATE_FACES_TABLE = "CREATE TABLE IF NOT EXISTS Faces(\"index\" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, \"video_index\" INTEGER, \"face_description\" BLOB);";
-//const char* SQLWorker::CREATE_REGIONS_TABLE = "CREATE TABLE IF NOT EXISTS Regions(\"video_index\" INTEGER, \"face_index\" INTEGER, \"regions\" string);";
+const char* SQLWorker::CREATE_FACES_TABLE = "CREATE TABLE IF NOT EXISTS Faces(\"index\" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, \"video_index\" INTEGER, \"best_frame_number\" INTEGER, \"face_description\" BLOB);";
 const char* SQLWorker::CREATE_REGIONS_TABLE = "CREATE TABLE IF NOT EXISTS Regions(\"video_index\" INTEGER, \"face_index\" INTEGER, \"first_frame\" INTEGER, \"duration\" INTEGER);";
-const char* SQLWorker::CREATE_SQL = "CREATE TABLE IF NOT EXISTS Faces(\"index\" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, \"video\" STRING, \"face_description\" BLOB, \"regions\" STRING);";
 
 SQLWorker::SQLWorker() : videoId(-1) {
 
@@ -48,46 +46,6 @@ int SQLWorker::writeNewVideo(const std::string& pathToVideo, const int framesNum
     return 0;
 }
 
-/*int SQLWorker::writeNewFace(IFaceFinder* faceFinder) {
-    sqlite3* db = nullptr;
-    int result = sqlite3_open(DB_NAME, &db);
-    CHECK_IF_FALSE_RETURN(result == SQLITE_OK, "Databse was opened", sqlite3_errmsg(db), 1);
-
-    char* err = nullptr;
-    result = sqlite3_exec(db, CREATE_FACES_TABLE, 0, 0, &err);
-    CHECK_IF_FALSE_RETURN_NO_OK_MESSAGE(result == SQLITE_OK, err, 1);
-    for (int i = 0; i < faceFinder->faceCount(); i++) {
-        FaceDescription* desc = faceFinder->getFaceInfo(i);
-        assert(desc != nullptr);
-
-        const int descSize = sizeof(desc->header) + desc->header.faceTemplateSize;
-        char* data = new char[descSize];
-        CopyMemory(data, desc, descSize);
-        std::string strData;
-        for (int j = 0; j < descSize; j++) {
-            strData += data[j];
-        }
-        delete data;
-
-        sqlite3_stmt* stmt = nullptr;
-        std::string insertSql = "INSERT INTO Faces(\"index\", \"video_index\", \"face_description\") VALUES(NULL, \"" + std::to_string(videoId ) + "\", ?);";
-        result = sqlite3_prepare_v2(db, insertSql.c_str(), -1, &stmt, NULL);
-        CHECK_IF_FALSE_RETURN(result == SQLITE_OK, "Databse prepared good", "prepare failed: " << sqlite3_errmsg(db), 1);
-
-        result = sqlite3_bind_blob(stmt, 1, strData.c_str(), descSize, SQLITE_STATIC);
-        CHECK_IF_FALSE_RETURN(result == SQLITE_OK, "Databse bind blob is good", "prepare failed: " << sqlite3_errmsg(db), 1);
-
-        result = sqlite3_step(stmt);
-        CHECK_IF_FALSE_RETURN(result == SQLITE_DONE, "Databse executed good", "execution failed: " << sqlite3_errmsg(db), 1);
-
-        sqlite3_finalize(stmt);
-    }
-
-    sqlite3_close(db);
-
-    return 0;
-}*/
-
 int SQLWorker::writeFaceData(IFaceFinder* faceFinder) {
     sqlite3* db = nullptr;
     int result = sqlite3_open(DB_NAME, &db);
@@ -114,7 +72,7 @@ int SQLWorker::writeFaceData(IFaceFinder* faceFinder) {
         delete data;
 
         sqlite3_stmt* stmt = nullptr;
-        std::string insertSql = "INSERT INTO Faces(\"index\", \"video_index\", \"face_description\") VALUES(NULL, \"" + std::to_string(videoId) + "\", ?);";
+        std::string insertSql = "INSERT INTO Faces(\"index\", \"video_index\", \"best_frame_number\", \"face_description\") VALUES(NULL, \"" + std::to_string(videoId) + "\", \"" + std::to_string(desc->header.frameNumber) + "\", ?);";
         result = sqlite3_prepare_v2(db, insertSql.c_str(), -1, &stmt, NULL);
         CHECK_IF_FALSE_RETURN(result == SQLITE_OK, " Faces new line", "prepare failed: " << sqlite3_errmsg(db), 1);
 
@@ -150,55 +108,6 @@ int SQLWorker::writeFaceData(IFaceFinder* faceFinder) {
     return 0;
 }
 
-
-/*int SQLWorker::writeToSql(IFaceFinder* faceFinder, const std::string& pathToVideo) {
-    sqlite3* db = nullptr;
-    int result = sqlite3_open(DB_NAME, &db);
-    CHECK_IF_FALSE_RETURN(result == SQLITE_OK, "Databse was opened", sqlite3_errmsg(db), 1);
-
-    char* err = nullptr;
-    result = sqlite3_exec(db, CREATE_SQL, 0, 0, &err);
-    CHECK_IF_FALSE_RETURN(result == SQLITE_OK, "Databse processed good", err, 1);
-    for (int i = 0; i < faceFinder->faceCount(); i++) {
-        FaceDescription* desc = faceFinder->getFaceInfo(i);
-        assert(desc != nullptr);
-
-        const int descSize = sizeof(desc->header) + desc->header.faceTemplateSize;
-        char* data = new char[descSize];
-        CopyMemory(data, desc, descSize);
-        std::string strData;
-        for (int j = 0; j < descSize; j++) {
-            strData += data[j];
-        }
-        delete data;
-
-        std::string regions;
-        for (int j = 0; j < faceFinder->frameRegionsNum(i); j++) {
-            FrameRegion* reg = faceFinder->getFaceRegionByIndex(i, j);
-            assert(reg != nullptr);
-
-            regions += std::to_string(reg->start) + "," + std::to_string(reg->duration) + ";";
-        }
-
-        sqlite3_stmt* stmt = NULL;
-        std::string insertSql = "INSERT INTO Faces(\"index\", \"video\", \"face_description\", \"regions\") VALUES(NULL, \"" + pathToVideo + "\", ?, \"" + regions + "\");";
-        result = sqlite3_prepare_v2(db, insertSql.c_str(), -1, &stmt, NULL);
-        CHECK_IF_FALSE_RETURN(result == SQLITE_OK, "Databse prepared good", "prepare failed: " << sqlite3_errmsg(db), 1);
-
-        result = sqlite3_bind_blob(stmt, 1, strData.c_str(), descSize, SQLITE_STATIC);
-        CHECK_IF_FALSE_RETURN(result == SQLITE_OK, "Databse bind blob is good", "prepare failed: " << sqlite3_errmsg(db), 1);
-
-        result = sqlite3_step(stmt);
-        CHECK_IF_FALSE_RETURN(result == SQLITE_DONE, "Databse executed good", "execution failed: " << sqlite3_errmsg(db), 1);
-
-        sqlite3_finalize(stmt);
-    }
-
-    sqlite3_close(db);
-
-    return 0;
-}*/
-
 bool SQLWorker::isDatabaseContainsVideo(const std::string& path) const {
     auto regions = getRegionsTableFromDb();
     sqlite3* db = nullptr;
@@ -224,169 +133,74 @@ bool SQLWorker::isDatabaseContainsVideo(const std::string& path) const {
     }
     sqlite3_close(db);
     return false;
-    //return std::find(allPaths.begin(), allPaths.end(), path) != allPaths.end();
 }
 
-std::map<double, std::pair<std::string, std::string>, std::greater<double>> SQLWorker::getFacesFromDb(FSDK_FaceTemplate* faceTemplate, const double threshold) {
-    auto regions = getRegionsTableFromDb();
-    std::map<double, std::pair<std::string, std::string>, std::greater<double>> result;
-    sqlite3* db = nullptr;
-    int rc = sqlite3_open(SQLWorker::DB_NAME, &db);
-    CHECK_IF_FALSE_RETURN_NO_OK_MESSAGE(rc == SQLITE_OK, sqlite3_errmsg(db), result);
-
-    for (const auto& a : regions) {
-        std::string sqlGetDescRequest("SELECT face_description FROM Faces WHERE \"index\" = " + std::to_string(a.faceIndex) + ";");
-        sqlite3_stmt* stmt = nullptr;
-        rc = sqlite3_prepare_v2(db, sqlGetDescRequest.c_str(), -1, &stmt, nullptr);
-        CHECK_IF_FALSE_RETURN_NO_OK_MESSAGE(rc == SQLITE_OK, "prepare failed: " << sqlite3_errmsg(db), result);
-
-        rc = sqlite3_step(stmt);
-        CHECK_IF_FALSE_RETURN_NO_OK_MESSAGE((rc == SQLITE_ROW), "prepare failed: " << sqlite3_errmsg(db), result);
-
-        FaceDescription* desc = reinterpret_cast<FaceDescription*>((char*)sqlite3_column_text(stmt, 0));
-        /*FaceDescription* dbDesc = createFaceDescription((int)sizeof(FSDK_FaceTemplate));
-        fillFaceDescription(dbDesc, desc->header.frameNumber, desc->header.x, desc->header.y, desc->header.width, desc->header.height, (int)sizeof(*desc->faceTemplate));
-        CopyMemory(dbDesc->faceTemplate, desc->faceTemplate, sizeof(FSDK_FaceTemplate));*/
-        float similarity = 0.0;
-        reinterpret_cast<FSDK_FaceTemplate*>(desc->faceTemplate);
-        FSDK_MatchFaces(reinterpret_cast<FSDK_FaceTemplate*>(desc->faceTemplate), faceTemplate, &similarity);
-        if (similarity >= threshold) {
-            std::string sqlGetPathRequest("SELECT path_to_a_video FROM Videos WHERE \"index\" = " + std::to_string(a.videoIndex) + ";");
+std::vector<SQLWorker::FaceFromDbInfo> SQLWorker::getFacesFromDb(FSDK_FaceTemplate* faceTemplate, const double threshold) {
+        auto regions = getRegionsTableFromDb();
+        std::vector<SQLWorker::FaceFromDbInfo> result;
+        sqlite3* db = nullptr;
+        int rc = sqlite3_open(SQLWorker::DB_NAME, &db);
+        CHECK_IF_FALSE_RETURN_NO_OK_MESSAGE(rc == SQLITE_OK, sqlite3_errmsg(db), result);
+    
+        for (const auto& a : regions) {
+            std::string sqlGetDescRequest("SELECT face_description FROM Faces WHERE \"index\" = " + std::to_string(a.faceIndex) + ";");
             sqlite3_stmt* stmt = nullptr;
-            rc = sqlite3_prepare_v2(db, sqlGetPathRequest.c_str(), -1, &stmt, nullptr);
+            rc = sqlite3_prepare_v2(db, sqlGetDescRequest.c_str(), -1, &stmt, nullptr);
             CHECK_IF_FALSE_RETURN_NO_OK_MESSAGE(rc == SQLITE_OK, "prepare failed: " << sqlite3_errmsg(db), result);
-
+    
             rc = sqlite3_step(stmt);
-            CHECK_IF_FALSE_RETURN_NO_OK_MESSAGE((rc == SQLITE_ROW), "step failed: " << sqlite3_errmsg(db), result);
+            CHECK_IF_FALSE_RETURN_NO_OK_MESSAGE((rc == SQLITE_ROW), "prepare failed: " << sqlite3_errmsg(db), result);
+    
+            FaceDescription* desc = reinterpret_cast<FaceDescription*>((char*)sqlite3_column_text(stmt, 0));
+            /*FaceDescription* dbDesc = createFaceDescription((int)sizeof(FSDK_FaceTemplate));
+            fillFaceDescription(dbDesc, desc->header.frameNumber, desc->header.x, desc->header.y, desc->header.width, desc->header.height, (int)sizeof(*desc->faceTemplate));
+            CopyMemory(dbDesc->faceTemplate, desc->faceTemplate, sizeof(FSDK_FaceTemplate));*/
+            float similarity = 0.0;
+            reinterpret_cast<FSDK_FaceTemplate*>(desc->faceTemplate);
+            FSDK_MatchFaces(reinterpret_cast<FSDK_FaceTemplate*>(desc->faceTemplate), faceTemplate, &similarity);
+            if (similarity >= threshold) {
+                SQLWorker::FaceFromDbInfo face;
+                face.similarity = similarity;
+                std::string sqlGetPathRequest("SELECT path_to_a_video FROM Videos WHERE \"index\" = " + std::to_string(a.videoIndex) + ";");
+                sqlite3_stmt* stmt = nullptr;
+                rc = sqlite3_prepare_v2(db, sqlGetPathRequest.c_str(), -1, &stmt, nullptr);
+                CHECK_IF_FALSE_RETURN_NO_OK_MESSAGE(rc == SQLITE_OK, "prepare failed: " << sqlite3_errmsg(db), result);
+    
+                rc = sqlite3_step(stmt);
+                CHECK_IF_FALSE_RETURN_NO_OK_MESSAGE((rc == SQLITE_ROW), "step failed: " << sqlite3_errmsg(db), result);
+    
+                face.pathToVideo = std::string((char*)sqlite3_column_text(stmt, 0));
+                sqlite3_finalize(stmt);
 
-            std::string dbPath = std::string((char*)sqlite3_column_text(stmt, 0));
-            sqlite3_finalize(stmt);
+                std::string sqlGetFrameNumRequest("SELECT best_frame_number FROM Faces WHERE \"index\" = " + std::to_string(a.faceIndex) + ";");
+                stmt = nullptr;
+                rc = sqlite3_prepare_v2(db, sqlGetFrameNumRequest.c_str(), -1, &stmt, nullptr);
+                CHECK_IF_FALSE_RETURN_NO_OK_MESSAGE(rc == SQLITE_OK, "prepare failed: " << sqlite3_errmsg(db), result);
 
-            std::string regionsString;
-            for (const auto& reg : a.regions) {
-                regionsString += std::to_string(reg.first) + "," + std::to_string(reg.second) + ";";
-            }
+                rc = sqlite3_step(stmt);
+                CHECK_IF_FALSE_RETURN_NO_OK_MESSAGE((rc == SQLITE_ROW), "step failed: " << sqlite3_errmsg(db), result);
 
-            result[similarity] = { dbPath, regionsString };
-        }
-
-
-        /*FSDK_FaceTemplate* currTemp = reinterpret_cast<FSDK_FaceTemplate*>(a.desc->faceTemplate);
-        float similarity = 0.0;
-        FSDK_MatchFaces(currTemp, faceTemplate, &similarity);
-        if (similarity >= threshold) {
-            std::string foundRegions;
-            for (const auto& res : result) {
-                if (res.first == a.path) {
-                    foundRegions = res.second;
-                    break;
+                face.bestFrameNumber = sqlite3_column_int(stmt, 0);
+                sqlite3_finalize(stmt);
+    
+                face.stringRegions = "";
+                for (const auto& reg : a.regions) {
+                    face.stringRegions += std::to_string(reg.first) + "," + std::to_string(reg.second) + ";";
                 }
+
+                result.push_back(face);
             }
-            if (!foundRegions.empty()) {
-                result[a.path] = foundRegions + a.regions;
-            } else {
-                result[a.path] = a.regions;
-            }
-        }*/
-    }
-    return result;
-}
-
-/*static int exec_callback(void* ptr, int argc, char* argv[], char* names[]) {
-    sqlite3* db = nullptr;
-    int result = sqlite3_open(SQLWorker::DB_NAME, &db);
-    CHECK_IF_FALSE_RETURN_NO_OK_MESSAGE(result == SQLITE_OK, sqlite3_errmsg(db), 1);
-
-    std::string sqlGetPathRequest("SELECT path_to_a_video FROM Videos WHERE \"index\" = ");
-    sqlGetPathRequest += argv[0];
-    sqlGetPathRequest += ";";
-    sqlite3_stmt* stmt = nullptr;
-    result = sqlite3_prepare_v2(db, sqlGetPathRequest.c_str(), -1, &stmt, nullptr);
-    CHECK_IF_FALSE_RETURN_NO_OK_MESSAGE(result == SQLITE_OK, "prepare failed: " << sqlite3_errmsg(db), 1);
-
-    result = sqlite3_step(stmt);
-    CHECK_IF_FALSE_RETURN_NO_OK_MESSAGE((result == SQLITE_ROW), "prepare failed: " << sqlite3_errmsg(db), 1);
-
-    SQLWorker::FaceData data;
-    data.path = std::string((char*)sqlite3_column_text(stmt, 0));
-    sqlite3_finalize(stmt);
-
-    std::string sqlGetDescRequest("SELECT face_description FROM Faces WHERE \"index\" = ");
-    sqlGetDescRequest += argv[1];
-    sqlGetDescRequest += ";";
-    stmt = nullptr;
-    result = sqlite3_prepare_v2(db, sqlGetDescRequest.c_str(), -1, &stmt, nullptr);
-    CHECK_IF_FALSE_RETURN_NO_OK_MESSAGE(result == SQLITE_OK, "prepare failed: " << sqlite3_errmsg(db), 1);
-
-    result = sqlite3_step(stmt);
-    CHECK_IF_FALSE_RETURN_NO_OK_MESSAGE((result == SQLITE_ROW), "prepare failed: " << sqlite3_errmsg(db), 1);
-
-    FaceDescription* desc = reinterpret_cast<FaceDescription*>((char*)sqlite3_column_text(stmt, 0));
-    data.desc = createFaceDescription((int)sizeof(FSDK_FaceTemplate));
-    fillFaceDescription(data.desc, desc->header.frameNumber, desc->header.x, desc->header.y, desc->header.width, desc->header.height, (int)sizeof(*desc->faceTemplate));
-    CopyMemory(data.desc->faceTemplate, desc->faceTemplate, sizeof(FSDK_FaceTemplate));
-
-    data.regions = argv[2];
-    data.regions += ",";
-    data.regions += argv[3];
-    data.regions += ";";
-
-    vector<SQLWorker::FaceData>* list = reinterpret_cast<vector<SQLWorker::FaceData>*>(ptr);
-    bool exist = false;
-    for (auto& a : *list) {
-        if (a.desc == data.desc && a.path == data.path) {
-            a.regions += data.regions;
-            exist = true;
-            break;
+    
         }
-    }
-    if (!exist) {
-        list->push_back(data);
-    }
-    sqlite3_close(db);
 
-    return 0;
-}*/
+        std::sort(std::begin(result), std::end(result), [](const SQLWorker::FaceFromDbInfo& first, const SQLWorker::FaceFromDbInfo& second) -> bool {
+            return first.similarity > second.similarity;
+        });
+
+        return result;
+}
 
 static int exec_callback(void* ptr, int argc, char* argv[], char* names[]) {
-    /*sqlite3* db = nullptr;
-    int result = sqlite3_open(SQLWorker::DB_NAME, &db);
-    CHECK_IF_FALSE_RETURN_NO_OK_MESSAGE(result == SQLITE_OK, sqlite3_errmsg(db), 1);
-
-    std::string sqlGetPathRequest("SELECT path_to_a_video FROM Videos WHERE \"index\" = ");
-    sqlGetPathRequest += argv[0];
-    sqlGetPathRequest += ";";
-    sqlite3_stmt* stmt = nullptr;
-    result = sqlite3_prepare_v2(db, sqlGetPathRequest.c_str(), -1, &stmt, nullptr);
-    CHECK_IF_FALSE_RETURN_NO_OK_MESSAGE(result == SQLITE_OK, "prepare failed: " << sqlite3_errmsg(db), 1);
-
-    result = sqlite3_step(stmt);
-    CHECK_IF_FALSE_RETURN_NO_OK_MESSAGE((result == SQLITE_ROW), "prepare failed: " << sqlite3_errmsg(db), 1);
-
-    SQLWorker::FaceData data;
-    data.path = std::string((char*)sqlite3_column_text(stmt, 0));
-    sqlite3_finalize(stmt);
-
-    std::string sqlGetDescRequest("SELECT face_description FROM Faces WHERE \"index\" = ");
-    sqlGetDescRequest += argv[1];
-    sqlGetDescRequest += ";";
-    stmt = nullptr;
-    result = sqlite3_prepare_v2(db, sqlGetDescRequest.c_str(), -1, &stmt, nullptr);
-    CHECK_IF_FALSE_RETURN_NO_OK_MESSAGE(result == SQLITE_OK, "prepare failed: " << sqlite3_errmsg(db), 1);
-
-    result = sqlite3_step(stmt);
-    CHECK_IF_FALSE_RETURN_NO_OK_MESSAGE((result == SQLITE_ROW), "prepare failed: " << sqlite3_errmsg(db), 1);
-
-    FaceDescription* desc = reinterpret_cast<FaceDescription*>((char*)sqlite3_column_text(stmt, 0));
-    data.desc = createFaceDescription((int)sizeof(FSDK_FaceTemplate));
-    fillFaceDescription(data.desc, desc->header.frameNumber, desc->header.x, desc->header.y, desc->header.width, desc->header.height, (int)sizeof(*desc->faceTemplate));
-    CopyMemory(data.desc->faceTemplate, desc->faceTemplate, sizeof(FSDK_FaceTemplate));
-
-    data.regions = argv[2];
-    data.regions += ",";
-    data.regions += argv[3];
-    data.regions += ";";*/
-
     vector<SQLWorker::DbRegionsTable>* list = reinterpret_cast<vector<SQLWorker::DbRegionsTable>*>(ptr);
     SQLWorker::DbRegionsTable data;
     data.videoIndex = atoi(argv[0]);
@@ -411,7 +225,6 @@ static int exec_callback(void* ptr, int argc, char* argv[], char* names[]) {
         data.regions.push_back(region);
         list->push_back(data);
     }
-    //sqlite3_close(db);
 
     return 0;
 }

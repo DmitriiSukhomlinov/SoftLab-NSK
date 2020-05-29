@@ -186,17 +186,47 @@ int main(int argc, char* argv[]) {
         FSDK_FreeImage(image);
 
         std::shared_ptr<SQLWorker> sqlWorker(new SQLWorker());
-        auto resMap = sqlWorker->getFacesFromDb(faceTemplate.get(), threshold);
+        auto res = sqlWorker->getFacesFromDb(faceTemplate.get(), threshold);
 
         std::filebuf fb;
         fb.open("out.txt", std::ios::out);
         std::ostream fout(&fb);
         int i = 1;
-        for (const auto& a : resMap) {
+        for (const auto& a : res) {
             fout << std::to_string(i++) << "." << endl;
-            fout << "Similarity: " << std::to_string(a.first) << endl;
-            fout << "Video: " << a.second.first << endl;
-            fout << "Regions: " << a.second.second << endl << endl;
+            fout << "Similarity: " << a.similarity << endl;
+            fout << "Video: " << a.pathToVideo << endl;
+            fout << "Best frame number: " << a.bestFrameNumber << endl;
+            fout << "Regions: " << a.stringRegions << endl << endl;
+
+            std::shared_ptr<ILoader> loader(ILoader::createLoader());
+            loader->init();
+            loader->loadFile(a.pathToVideo);
+            const int width = loader->getPictureWidth();
+            const int height = loader->getPictureHeight();
+            const int scanLine = loader->getSkanLine();
+            unsigned char* data = nullptr;
+            while (true) {
+                data = loader->readNextFrame();
+                if (loader->getLastReadFrameNumber() == a.bestFrameNumber) {
+                    break;
+                } else {
+                    delete data;
+                }
+            }
+
+            HImage image;
+            result = FSDK_LoadImageFromBuffer(&image, data, width, height, scanLine, FSDK_IMAGEMODE::FSDK_IMAGE_COLOR_24BIT);//!
+            if (result != FSDKE_OK) {
+                FSDK_FreeImage(image);
+                cout << "Error in the loading process, error code " << result;
+                return 1;
+            }
+
+            std::string file = std::to_string(i-1) + ".bmp";
+            result = FSDK_SaveImageToFile(image, file.c_str());
+            FSDK_FreeImage(image);
+            loader->finish();
         }
     } else {
         CHECK_IF_FALSE_RETURN_NO_OK_MESSAGE(false, "Unexpected second argument", 1);

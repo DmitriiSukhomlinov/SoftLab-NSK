@@ -12,22 +12,20 @@ public:
     SQLWorker();
 
     int writeNewVideo(const std::string& pathToVideo, const int framesNumber);
-    //int writeNewFace(IFaceFinder* faceFinder);
     int writeFaceData(IFaceFinder* faceFinder);
 
-    //int writeToSql(IFaceFinder* faceFinder, const std::string& pathToVideo);
     bool isDatabaseContainsVideo(const std::string& path) const;
-    std::map<double, std::pair<std::string, std::string>, std::greater<double>> getFacesFromDb(FSDK_FaceTemplate* faceTemplate, const double threshold);
 
-    //struct FaceData {
-    //    /*std::string path;
-    //    FaceDescription* desc;
-    //    std::string regions;*/
+    struct FaceFromDbInfo {
+        FaceFromDbInfo() : similarity(0.0), bestFrameNumber(0) {}
+        double similarity;
+        std::string pathToVideo;
+        std::string stringRegions;
+        int bestFrameNumber;
+    };
 
-    //    int videoIndex;
-    //    int faceIndex;
-    //    std::list<std::pair<int, int> > regions;
-    //};
+    std::vector<FaceFromDbInfo> getFacesFromDb(FSDK_FaceTemplate* faceTemplate, const double threshold);
+
 
     struct DbRegionsTable {
         int videoIndex;
@@ -45,7 +43,6 @@ private:
     static const char* CREATE_VIDEO_TABLE;
     static const char* CREATE_FACES_TABLE;
     static const char* CREATE_REGIONS_TABLE;
-    static const char* CREATE_SQL;
 
 
 };
