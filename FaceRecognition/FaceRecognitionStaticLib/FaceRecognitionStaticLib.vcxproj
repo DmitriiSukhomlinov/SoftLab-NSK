@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -184,6 +184,7 @@
     <ClCompile Include="src\FaceFinder\IFaceFinder.cpp" />
     <ClCompile Include="src\Loaders\AviLoader.cpp" />
     <ClCompile Include="src\Loaders\ILoader.cpp" />
+    <ClCompile Include="src\TimeChecker\TimeChecker.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\FaceFinder\FaceDescription.h" />
@@ -194,6 +195,7 @@
     <ClInclude Include="src\GetAVIInfo\GetAVIInfo.h" />
     <ClInclude Include="src\Loaders\AviLoader.h" />
     <ClInclude Include="src\Loaders\ILoader.h" />
+    <ClInclude Include="src\TimeChecker\TimeChecker.h" />
     <ClInclude Include="src\Utils\Check.h" />
     <ClInclude Include="src\Utils\Consts.h" />
   </ItemGroup>

@@ -20,6 +20,7 @@ using namespace std;
 #define CHECK_IF_FALSE_RETURN_NO_OK_MESSAGE(condition, messageError, result) \
     if (!condition) { \
         cout << messageError << endl; \
+        system("pause"); \
         return result; \
     } \
 

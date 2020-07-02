@@ -11,6 +11,8 @@
 
 #include "../FaceSDK/LuxandFaceSDK.h"
 
+#include "../TimeChecker/TimeChecker.h"
+
 class FaceFinder : public IFaceFinder {
 public:
     //Всякое обязательное добро, перегруженное
@@ -104,6 +106,8 @@ private:
     double hightSimilarityThreshold;
     double lowSimilarityThreshold;
 
+    TimeChecker tc;
+    int time;
 
     static const std::map<ColorDepth, FSDK_IMAGEMODE> COLOR_DEPTH_CORRELATION;
     static const int MAX_FACE_COUNT;

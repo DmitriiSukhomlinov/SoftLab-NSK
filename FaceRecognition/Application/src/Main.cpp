@@ -20,6 +20,8 @@
 
 #include "SQLWorker/SQLWorker.h"
 
+#include "TimeChecker/TimeChecker.h"
+
 int readBmp(const std::string& path, unsigned char*& data, int& width, int& height, int& scanLine) {
     FILE* bmp = fopen(path.c_str(), "rb");//Открываем файл для чтения побитово, НАДО УБРАТЬ ВОРНИНГ!!!
 
@@ -133,8 +135,8 @@ int main(int argc, char* argv[]) {
         //--update "F:\softlab-nsk\Test videos\Putin and children questions.avi" 0.9 0.65 100
         CHECK_IF_FALSE_RETURN_NO_OK_MESSAGE((argc == 5 || argc == 6), "Unexpected arguments", 1);
         const std::string pathToVideo = std::string(argv[2]);
-        const double firstThreshold = atof(argv[3]);
-        const double secondThreshold = atof(argv[4]);
+        const double firstThreshold = (double)atof(argv[3]) / 100;
+        const double secondThreshold = (double)atof(argv[4]) / 100;
         CHECK_IF_FALSE_RETURN_NO_OK_MESSAGE((firstThreshold >= secondThreshold), "Unexpected thresholds, the first must be higher then the second", 1);
 
         const int frameMultiplicator = argc == 6 ? atoi(argv[5]) : 1;
@@ -142,7 +144,7 @@ int main(int argc, char* argv[]) {
     } else if (std::string(argv[1]) == "--find") {
         CHECK_IF_FALSE_RETURN_NO_OK_MESSAGE((argc == 4), "Unexpected arguments", 1);
         const std::string pathToPicture = std::string(argv[2]);
-        const double threshold = atof(argv[3]);
+        const double threshold = (double)atof(argv[3]) / 100;
         int width = -1;
         int height = -1;
         int scanLine = -1;
@@ -186,7 +188,10 @@ int main(int argc, char* argv[]) {
         FSDK_FreeImage(image);
 
         std::shared_ptr<SQLWorker> sqlWorker(new SQLWorker());
+        TimeChecker tc;
+        tc.startTimer();
         auto res = sqlWorker->getFacesFromDb(faceTemplate.get(), threshold);
+        cout << tc.checkTimer() << " Microseconds" << endl;
 
         std::filebuf fb;
         fb.open("out.txt", std::ios::out);
@@ -228,6 +233,8 @@ int main(int argc, char* argv[]) {
             FSDK_FreeImage(image);
             loader->finish();
         }
+        fb.close();
+
     } else {
         CHECK_IF_FALSE_RETURN_NO_OK_MESSAGE(false, "Unexpected second argument", 1);
     }

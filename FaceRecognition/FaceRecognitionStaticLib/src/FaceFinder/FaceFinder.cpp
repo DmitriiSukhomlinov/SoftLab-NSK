@@ -5,6 +5,10 @@
 #include <algorithm>
 #include <direct.h>
 #include <filesystem>
+
+
+#include <iostream>     // std::cout, std::ostream, std::ios
+#include <fstream>  
 /*************************************/
 /*************FaceFinder**************/
 /*************************************/
@@ -35,23 +39,27 @@ const int FaceFinder::MAX_FACE_COUNT = 10;
 
 FaceFinder::FaceFinder() : 
     hightSimilarityThreshold(0.0), 
-    lowSimilarityThreshold(0.0) {}
+    lowSimilarityThreshold(0.0),
+    time(0) {}
 
 FaceFinder::~FaceFinder() {
     clearAll();
 }
 
 void FaceFinder::init(const double firstThreshold, const double secondThreshold) {
+    tc.startTimer();
     hightSimilarityThreshold = firstThreshold;
     lowSimilarityThreshold = secondThreshold;
     cout << "FaceFinder initializing";
     clearAll();
+    time += tc.checkTimer();
     std::filesystem::remove_all(std::filesystem::path(PICTURES_HIGHT_DIRECTORY));
     std::filesystem::remove_all(std::filesystem::path(PICTURES_LOW_DIRECTORY));
 }
 
 
 void FaceFinder::addImage(const int _frameNumber, void* inputVideoBuffer, const int xPictureSize, const int yPictureSize, const int scanLine, const ColorDepth colorDepth) {
+    tc.startTimer();
     HImage image;
     unsigned char* data = static_cast<unsigned char*>(inputVideoBuffer);
     FSDK_IMAGEMODE mode = COLOR_DEPTH_CORRELATION.at(colorDepth);
@@ -60,6 +68,7 @@ void FaceFinder::addImage(const int _frameNumber, void* inputVideoBuffer, const 
     if (result != FSDKE_OK) {
         FSDK_FreeImage(image);
         cout << "Error in the loading process, error code " << result;
+        time += tc.checkTimer();
         return;
     }
 
@@ -77,6 +86,7 @@ void FaceFinder::addImage(const int _frameNumber, void* inputVideoBuffer, const 
     }
     if (facesCount == 0) {
         FSDK_FreeImage(image);
+        time += tc.checkTimer();
         return;
     }
     
@@ -124,9 +134,11 @@ void FaceFinder::addImage(const int _frameNumber, void* inputVideoBuffer, const 
         }
     }
     FSDK_FreeImage(image);
+    time += tc.checkTimer();
 }
 
 void FaceFinder::finish() {
+    tc.startTimer();
     cout << "FaceFinder finalizing";
 
     int prevSize = (int)tempDescriptions.size();
@@ -203,6 +215,12 @@ void FaceFinder::finish() {
     //сравнение с другим порогом (грубее)
 
     //скопировать из frameNumber, TFacePosition, FSDK_FaceTemplate в DescriptionData*
+    time += tc.checkTimer();
+    std::filebuf fb;
+    fb.open("time.txt", std::ios::out);
+    std::ostream fout(&fb);
+    fout << time << " Microseconds";
+    fb.close();
 }
 
 int FaceFinder::faceCount() const {
@@ -311,7 +329,7 @@ void FaceFinder::saveNotFound(const int frameNumber, HImage image) {
     const std::string not_found = PICTURES_HIGHT_DIRECTORY + "not_found\\";
     std::filesystem::create_directories(std::filesystem::path(not_found));
     std::string out = not_found + to_string(frameNumber) + ".bmp";
-    FSDK_SaveImageToFile(image, out.c_str());
+    //FSDK_SaveImageToFile(image, out.c_str());
 }
 
 void FaceFinder::saveFirstTime(const int frameNumber, HImage image) {
@@ -319,7 +337,7 @@ void FaceFinder::saveFirstTime(const int frameNumber, HImage image) {
     const std::string newDir = PICTURES_HIGHT_DIRECTORY + to_string(tempDescriptions.size()) + "\\";
     std::filesystem::create_directories(std::filesystem::path(newDir));
     std::string out = newDir + to_string(frameNumber) + ".bmp";
-    FSDK_SaveImageToFile(image, out.c_str());
+    //FSDK_SaveImageToFile(image, out.c_str());
 }
 
 void FaceFinder::saveAlreadyFound(const int frameNumber, HImage image, FaceDescriptionTemp* tmpDesc) {
@@ -333,7 +351,7 @@ void FaceFinder::saveAlreadyFound(const int frameNumber, HImage image, FaceDescr
     cout << "Frame " << frameNumber << ": added to the existing group # " << num << endl;
     const std::string dir = PICTURES_HIGHT_DIRECTORY + to_string(num) + "\\";
     std::string out = dir + to_string(frameNumber) + ".bmp";
-    /*int result = */FSDK_SaveImageToFile(image, out.c_str());
+    //FSDK_SaveImageToFile(image, out.c_str());
 }
 
 

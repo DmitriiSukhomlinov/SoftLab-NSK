@@ -146,10 +146,10 @@ std::vector<SQLWorker::FaceFromDbInfo> SQLWorker::getFacesFromDb(FSDK_FaceTempla
             std::string sqlGetDescRequest("SELECT face_description FROM Faces WHERE \"index\" = " + std::to_string(a.faceIndex) + ";");
             sqlite3_stmt* stmt = nullptr;
             rc = sqlite3_prepare_v2(db, sqlGetDescRequest.c_str(), -1, &stmt, nullptr);
-            CHECK_IF_FALSE_RETURN_NO_OK_MESSAGE(rc == SQLITE_OK, "prepare failed: " << sqlite3_errmsg(db), result);
+            CHECK_IF_FALSE_RETURN_NO_OK_MESSAGE(rc == SQLITE_OK, "prepare failed 1: " << sqlite3_errmsg(db), result);
     
             rc = sqlite3_step(stmt);
-            CHECK_IF_FALSE_RETURN_NO_OK_MESSAGE((rc == SQLITE_ROW), "prepare failed: " << sqlite3_errmsg(db), result);
+            CHECK_IF_FALSE_RETURN_NO_OK_MESSAGE((rc == SQLITE_ROW || rc == SQLITE_DONE), "prepare failed 2: " << sqlite3_errmsg(db), result);
     
             FaceDescription* desc = reinterpret_cast<FaceDescription*>((char*)sqlite3_column_text(stmt, 0));
             /*FaceDescription* dbDesc = createFaceDescription((int)sizeof(FSDK_FaceTemplate));
@@ -164,10 +164,10 @@ std::vector<SQLWorker::FaceFromDbInfo> SQLWorker::getFacesFromDb(FSDK_FaceTempla
                 std::string sqlGetPathRequest("SELECT path_to_a_video FROM Videos WHERE \"index\" = " + std::to_string(a.videoIndex) + ";");
                 sqlite3_stmt* stmt = nullptr;
                 rc = sqlite3_prepare_v2(db, sqlGetPathRequest.c_str(), -1, &stmt, nullptr);
-                CHECK_IF_FALSE_RETURN_NO_OK_MESSAGE(rc == SQLITE_OK, "prepare failed: " << sqlite3_errmsg(db), result);
+                CHECK_IF_FALSE_RETURN_NO_OK_MESSAGE(rc == SQLITE_OK, "prepare failed 3: " << sqlite3_errmsg(db), result);
     
                 rc = sqlite3_step(stmt);
-                CHECK_IF_FALSE_RETURN_NO_OK_MESSAGE((rc == SQLITE_ROW), "step failed: " << sqlite3_errmsg(db), result);
+                CHECK_IF_FALSE_RETURN_NO_OK_MESSAGE((rc == SQLITE_ROW || rc == SQLITE_DONE), "step failed: " << sqlite3_errmsg(db), result);
     
                 face.pathToVideo = std::string((char*)sqlite3_column_text(stmt, 0));
                 sqlite3_finalize(stmt);
@@ -175,7 +175,7 @@ std::vector<SQLWorker::FaceFromDbInfo> SQLWorker::getFacesFromDb(FSDK_FaceTempla
                 std::string sqlGetFrameNumRequest("SELECT best_frame_number FROM Faces WHERE \"index\" = " + std::to_string(a.faceIndex) + ";");
                 stmt = nullptr;
                 rc = sqlite3_prepare_v2(db, sqlGetFrameNumRequest.c_str(), -1, &stmt, nullptr);
-                CHECK_IF_FALSE_RETURN_NO_OK_MESSAGE(rc == SQLITE_OK, "prepare failed: " << sqlite3_errmsg(db), result);
+                CHECK_IF_FALSE_RETURN_NO_OK_MESSAGE(rc == SQLITE_OK, "prepare failed 4: " << sqlite3_errmsg(db), result);
 
                 rc = sqlite3_step(stmt);
                 CHECK_IF_FALSE_RETURN_NO_OK_MESSAGE((rc == SQLITE_ROW), "step failed: " << sqlite3_errmsg(db), result);
